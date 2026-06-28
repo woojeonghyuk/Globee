@@ -99,29 +99,6 @@ export default function ResetPasswordScreen() {
     setIsSubmitting(true);
 
     const normalizedPhone = normalizeKoreanPhone(phone);
-    const { data: isRegistered, error: registrationCheckError } =
-      await supabase.rpc('is_phone_registered', {
-        p_phone: normalizedPhone,
-      });
-
-    if (registrationCheckError) {
-      setIsSubmitting(false);
-      Alert.alert(
-        '가입 확인 실패',
-        '전화번호 가입 여부를 확인하지 못했어요. 잠시 후 다시 시도해주세요.',
-      );
-      return;
-    }
-
-    if (!isRegistered) {
-      setIsSubmitting(false);
-      Alert.alert(
-        '가입된 번호가 아니에요',
-        '회원가입한 전화번호인지 확인해주세요.',
-      );
-      return;
-    }
-
     const { error } = await requestResetOtp(normalizedPhone);
 
     if (error) {

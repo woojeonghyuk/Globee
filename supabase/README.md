@@ -66,6 +66,8 @@ supabase/sql/20260418_application_notifications.sql
 supabase/sql/20260418_harden_admin_delete_class.sql
 supabase/sql/20260418_harden_finalization_workflow.sql
 supabase/sql/20260419_restore_conditional_class_closure.sql
+supabase/sql/20260628_explicit_data_api_grants.sql
+supabase/sql/20260628_harden_security_definer_functions.sql
 ```
 
 `20260418_close_class_on_first_finalized_application.sql`을 이미 실행한 DB는
@@ -80,4 +82,7 @@ active 신청이 남은 문화교류를 다시 열고, 이후에는 active 신�
 - Edge Function은 `verify_jwt = false`로 배포하지만 함수 내부에서 `Authorization` 헤더와 `auth.getUser()`로 세션을 직접 검증한 뒤 service role client를 사용합니다.
 - 카카오워크 Webhook URL은 Supabase Secret에만 저장하고 코드에 직접 넣지 않습니다.
 - 새 SQL을 추가하면 Supabase SQL Editor에서 실행한 뒤 앱/관리자웹 주요 흐름을 다시 테스트합니다.
+- 새 테이블, 시퀀스, RPC를 추가할 때는 같은 SQL 파일에 역할별 최소 `GRANT`와 RLS 정책을 함께 작성합니다.
+- `is_phone_registered` RPC는 기존 설치 앱 호환성을 위해 임시 유지합니다. 해당 RPC 호출을 제거한 모바일 업데이트가 운영 사용자에게 배포된 뒤 실행 권한을 제거합니다.
+- Supabase Pro 이상에서는 Auth 설정의 Leaked Password Protection을 활성화합니다.
 - Storage 사진 파일은 private bucket에 저장하고, RLS로 해당 보호자와 운영진만 접근하게 합니다.

@@ -117,29 +117,6 @@ export default function SignUpScreen() {
     setIsSubmitting(true);
 
     const normalizedPhone = normalizeKoreanPhone(phone);
-    const { data: isRegistered, error: registrationCheckError } =
-      await supabase.rpc('is_phone_registered', {
-        p_phone: normalizedPhone,
-      });
-
-    if (registrationCheckError) {
-      setIsSubmitting(false);
-      Alert.alert(
-        '가입 확인 실패',
-        '전화번호 가입 여부를 확인하지 못했어요. 잠시 후 다시 시도해주세요.',
-      );
-      return;
-    }
-
-    if (isRegistered) {
-      setIsSubmitting(false);
-      Alert.alert(
-        '이미 가입한 전화번호',
-        '이미 가입했거나 인증이 진행 중인 전화번호입니다. 로그인하거나 비밀번호 찾기를 이용해주세요.',
-      );
-      return;
-    }
-
     const { data, error } = await supabase.auth.signUp({
       phone: normalizedPhone,
       password: createTemporaryPassword(),
