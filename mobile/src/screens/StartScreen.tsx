@@ -153,6 +153,23 @@ export default function StartScreen() {
             </Pressable>
 
             <Pressable
+              style={({ pressed }) => [
+                styles.browseButton,
+                pressed && styles.buttonPressed,
+              ]}
+              onPress={() =>
+                router.push({
+                  pathname: '/(tabs)/home',
+                  params: { guestIntro: '1' },
+                })
+              }
+            >
+              <Text style={styles.browseButtonText}>
+                로그인 없이 클래스 둘러보기
+              </Text>
+            </Pressable>
+
+            <Pressable
               onPress={() => router.push('/login')}
               hitSlop={10}
               style={({ pressed }) => pressed && styles.linkPressed}
@@ -243,8 +260,23 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     letterSpacing: 0,
   },
+  browseButton: {
+    height: 54,
+    marginTop: 12,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.7)',
+    borderWidth: 1,
+    borderColor: colors.navy,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  browseButtonText: {
+    color: colors.navy,
+    fontSize: 16,
+    fontWeight: '900',
+  },
   linkText: {
-    marginTop: 22,
+    marginTop: 18,
     textAlign: 'center',
     color: colors.navy,
     fontSize: 15,

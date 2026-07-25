@@ -21,7 +21,12 @@ export default function RootLayout() {
       <ClassesProvider>
         <ApplicationsProvider>
           <CompletedRecordsProvider>
-            <Stack screenOptions={{ headerShown: false }}>
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                gestureEnabled: false,
+              }}
+            >
               <Stack.Screen name="index" />
               <Stack.Screen name="login" />
               <Stack.Screen name="signup" />

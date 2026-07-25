@@ -3,6 +3,7 @@ import {
   Alert,
   Keyboard,
   KeyboardAvoidingView,
+  Linking,
   Modal,
   Platform,
   Pressable,
@@ -49,6 +50,9 @@ const activeApplicationStatuses = new Set([
   '확정 대기',
 ]);
 
+const PRIVACY_POLICY_URL = 'https://globee.ai.kr/privacy.html';
+const TERMS_URL = 'https://globee.ai.kr/terms.html';
+
 function normalizeChildName(value: string) {
   return value.replace(/\s/g, '').toLowerCase();
 }
@@ -87,6 +91,14 @@ export default function MyPageScreen() {
   const [errors, setErrors] = useState<FieldErrors>({});
   const [isSavingChild, setIsSavingChild] = useState(false);
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+
+  const openLegalPage = async (url: string) => {
+    try {
+      await Linking.openURL(url);
+    } catch {
+      Alert.alert('페이지 열기 실패', '잠시 후 다시 시도해주세요.');
+    }
+  };
 
   const isEditMode = useMemo(() => selectedChildId !== null, [selectedChildId]);
   const openAddChildParam = Array.isArray(params.openAddChild)
@@ -495,6 +507,16 @@ export default function MyPageScreen() {
             </Text>
           </Pressable>
         </View>
+
+        <View style={styles.legalLinks}>
+          <Pressable onPress={() => void openLegalPage(PRIVACY_POLICY_URL)}>
+            <Text style={styles.legalLinkText}>개인정보처리방침</Text>
+          </Pressable>
+          <Text style={styles.legalLinkDivider}>·</Text>
+          <Pressable onPress={() => void openLegalPage(TERMS_URL)}>
+            <Text style={styles.legalLinkText}>이용약관</Text>
+          </Pressable>
+        </View>
       </View>
 
       <Modal
@@ -834,6 +856,24 @@ const styles = StyleSheet.create({
     color: '#A05252',
     fontSize: 14,
     fontWeight: '900',
+  },
+  legalLinks: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    marginTop: 14,
+  },
+  legalLinkText: {
+    color: colors.navySoft,
+    fontSize: 12,
+    fontWeight: '700',
+    textDecorationLine: 'underline',
+  },
+  legalLinkDivider: {
+    color: colors.navySoft,
+    fontSize: 12,
+    opacity: 0.55,
   },
   pressed: {
     opacity: 0.9,

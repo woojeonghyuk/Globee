@@ -159,15 +159,8 @@ export function ClassesProvider({ children }: ClassesProviderProps) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'SIGNED_IN') {
+      if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
         refreshClasses();
-      }
-
-      if (event === 'SIGNED_OUT') {
-        setClasses([]);
-        setClassCatalog([]);
-        setErrorMessage('');
-        setIsLoading(false);
       }
     });
 

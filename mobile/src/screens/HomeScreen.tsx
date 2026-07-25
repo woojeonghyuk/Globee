@@ -7,7 +7,8 @@ import {
   Text,
   View,
 } from 'react-native';
-import { router } from 'expo-router';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 
 import ClassCard from '@/src/components/ClassCard';
@@ -47,6 +48,7 @@ function getClassSortTime(classItem: ClassItem) {
 }
 
 export default function HomeScreen() {
+  const { guestIntro } = useLocalSearchParams<{ guestIntro?: string }>();
   const { children, isLoading: isLoadingChildren } = useChildProfiles();
   const { classes, errorMessage, isLoading, refreshClasses } = useClasses();
   const {
@@ -59,6 +61,8 @@ export default function HomeScreen() {
   const [selectedClass, setSelectedClass] = useState<ClassItem | null>(null);
   const [selectedChildIds, setSelectedChildIds] = useState<string[]>([]);
   const [isApplying, setIsApplying] = useState(false);
+  const [hasSession, setHasSession] = useState<boolean | null>(null);
+  const [showGuestBrowsingGuide, setShowGuestBrowsingGuide] = useState(false);
   const [showChildRegistrationGuide, setShowChildRegistrationGuide] =
     useState(false);
 
@@ -88,6 +92,46 @@ export default function HomeScreen() {
       setSelectedCampus(campusOptions[0]);
     }
   }, [campusOptions, selectedCampus]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    supabase.auth
+      .getSession()
+      .then(({ data }) => {
+        if (isMounted) {
+          setHasSession(Boolean(data.session));
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setHasSession(false);
+        }
+      });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (isMounted) {
+        setHasSession(Boolean(session));
+      }
+    });
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (hasSession === false && guestIntro === '1') {
+      setShowGuestBrowsingGuide(true);
+    }
+
+    if (hasSession === true) {
+      setShowGuestBrowsingGuide(false);
+    }
+  }, [guestIntro, hasSession]);
 
   const filteredClasses = useMemo(
     () =>
@@ -271,6 +315,27 @@ export default function HomeScreen() {
     router.push('/(tabs)/my');
   };
 
+  const goToLogin = () => {
+    closeClassDetail();
+    router.push('/login');
+  };
+
+  const goToSignup = () => {
+    closeClassDetail();
+    router.push('/signup');
+  };
+
+  const returnToStart = () => {
+    closeClassDetail();
+    setShowGuestBrowsingGuide(false);
+    router.replace('/');
+  };
+
+  const dismissGuestBrowsingGuide = () => {
+    setShowGuestBrowsingGuide(false);
+    router.setParams({ guestIntro: undefined });
+  };
+
   const dismissChildRegistrationGuide = useCallback(async () => {
     setShowChildRegistrationGuide(false);
 
@@ -293,6 +358,15 @@ export default function HomeScreen() {
 
   const handleApply = async () => {
     if (!selectedClass || isApplying) return;
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session) {
+      goToLogin();
+      return;
+    }
 
     const remainingSeats = getSeatsRemaining(selectedClass);
 
@@ -429,10 +503,38 @@ export default function HomeScreen() {
   const selectedClassSeatsFull = selectedClass
     ? getSeatsRemaining(selectedClass) === 0
     : false;
-  const isApplyButtonDisabled = isApplying || selectedClassSeatsFull;
+  const isApplyButtonDisabled =
+    isApplying || selectedClassSeatsFull || hasSession === null;
 
   return (
     <ScreenShell>
+      <Modal
+        visible={showGuestBrowsingGuide}
+        transparent
+        animationType="fade"
+        onRequestClose={dismissGuestBrowsingGuide}
+      >
+        <View style={styles.guestGuideOverlay}>
+          <View style={styles.guestGuideCard}>
+            <Text style={styles.guestGuideTitle}>
+              학교별 수업, 일정과 잔여 자리를 자유롭게 확인하세요.
+            </Text>
+            <Text style={styles.guestGuideText}>
+              아이 등록 및 클래스 신청은 로그인 후 이용할 수 있어요.
+            </Text>
+            <Pressable
+              style={({ pressed }) => [
+                styles.guestGuideButton,
+                pressed && styles.pressed,
+              ]}
+              onPress={dismissGuestBrowsingGuide}
+            >
+              <Text style={styles.guestGuideButtonText}>확인</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
+
       <Modal
         visible={showChildRegistrationGuide}
         transparent
@@ -503,7 +605,23 @@ export default function HomeScreen() {
       </Modal>
 
       <View style={styles.header}>
-        <Text style={styles.brand}>Globee</Text>
+        <View style={styles.brandRow}>
+          {hasSession === false ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="시작화면으로 돌아가기"
+              hitSlop={10}
+              onPress={returnToStart}
+              style={({ pressed }) => [
+                styles.guestBackButton,
+                pressed && styles.pressed,
+              ]}
+            >
+              <Ionicons name="arrow-back" size={20} color={colors.navy} />
+            </Pressable>
+          ) : null}
+          <Text style={styles.brand}>Globee</Text>
+        </View>
         <Text style={styles.title}>동네에서 떠나는 세계여행{'\n'}오늘 가볼 나라는 어디일까요?</Text>
       </View>
 
@@ -575,35 +693,70 @@ export default function HomeScreen() {
         capacityText={selectedClass ? getCapacityText(selectedClass) : undefined}
         onClose={closeClassDetail}
         action={
-          <Pressable
-            style={({ pressed }) => [
-              styles.applyButton,
-              isApplyButtonDisabled && styles.applyButtonDisabled,
-              pressed &&
-                !isApplyButtonDisabled &&
-                styles.pressed,
-            ]}
-            disabled={isApplyButtonDisabled}
-            onPress={handleApply}
-          >
-            <Text style={styles.applyButtonText}>
-              {isApplying
-                ? '신청 보내는 중'
-                : selectedClassSeatsFull
-                ? '마감된 문화교류'
-                : selectedChildren.length > 1
-                ? `${selectedChildren.length}명 신청하기`
-                : selectedChildren.length === 0
-                ? '신청할 아이 선택하기'
-                : '신청하기'}
-            </Text>
-          </Pressable>
+          hasSession === false && !selectedClassSeatsFull ? (
+            <View style={styles.guestAuthActions}>
+              <Pressable
+                style={({ pressed }) => [
+                  styles.guestLoginButton,
+                  pressed && styles.pressed,
+                ]}
+                onPress={goToLogin}
+              >
+                <Text style={styles.guestLoginButtonText}>로그인</Text>
+              </Pressable>
+              <Pressable
+                style={({ pressed }) => [
+                  styles.guestSignupButton,
+                  pressed && styles.pressed,
+                ]}
+                onPress={goToSignup}
+              >
+                <Text style={styles.guestSignupButtonText}>회원가입</Text>
+              </Pressable>
+            </View>
+          ) : (
+            <Pressable
+              style={({ pressed }) => [
+                styles.applyButton,
+                isApplyButtonDisabled && styles.applyButtonDisabled,
+                pressed &&
+                  !isApplyButtonDisabled &&
+                  styles.pressed,
+              ]}
+              disabled={isApplyButtonDisabled}
+              onPress={handleApply}
+            >
+              <Text style={styles.applyButtonText}>
+                {isApplying
+                  ? '신청 보내는 중'
+                  : selectedClassSeatsFull
+                  ? '마감된 문화교류'
+                  : hasSession === null
+                  ? '로그인 확인 중'
+                  : selectedChildren.length > 1
+                  ? `${selectedChildren.length}명 신청하기`
+                  : selectedChildren.length === 0
+                  ? '신청할 아이 선택하기'
+                  : '신청하기'}
+              </Text>
+            </Pressable>
+          )
         }
       >
         <View style={styles.childSelectSection}>
-          <Text style={styles.childSelectTitle}>신청할 아이</Text>
-
-          {children.length > 0 ? (
+          {hasSession === false ? (
+            <View style={styles.guestApplyNotice}>
+              <Text style={styles.guestApplyNoticeTitle}>
+                클래스 신청은 로그인이 필요해요
+              </Text>
+              <Text style={styles.guestApplyNoticeText}>
+                계정이 있다면 로그인하고, 처음이라면 회원가입 후 클래스를
+                신청할 수 있어요.
+              </Text>
+            </View>
+          ) : children.length > 0 ? (
+            <>
+              <Text style={styles.childSelectTitle}>신청할 아이</Text>
             <View style={styles.childChipRow}>
               {children.map((child) => {
                 const isActive = selectedChildIds.includes(child.id);
@@ -651,15 +804,19 @@ export default function HomeScreen() {
                 <Text style={styles.addChildChipText}>+ 아이 추가</Text>
               </Pressable>
             </View>
+            </>
           ) : (
-            <View style={styles.emptyChildBox}>
-              <Text style={styles.emptyChildText}>
-                등록된 아이가 없어요. 마이페이지에서 먼저 아이를 등록해주세요.
-              </Text>
-              <Pressable style={styles.goMyButton} onPress={goToMyPage}>
-                <Text style={styles.goMyButtonText}>마이페이지로 가기</Text>
-              </Pressable>
-            </View>
+            <>
+              <Text style={styles.childSelectTitle}>신청할 아이</Text>
+              <View style={styles.emptyChildBox}>
+                <Text style={styles.emptyChildText}>
+                  등록된 아이가 없어요. 마이페이지에서 먼저 아이를 등록해주세요.
+                </Text>
+                <Pressable style={styles.goMyButton} onPress={goToMyPage}>
+                  <Text style={styles.goMyButtonText}>마이페이지로 가기</Text>
+                </Pressable>
+              </View>
+            </>
           )}
         </View>
       </ClassDetailSheet>
@@ -773,12 +930,28 @@ const styles = StyleSheet.create({
   header: {
     marginBottom: 28,
   },
+  brandRow: {
+    minHeight: 30,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 10,
+  },
+  guestBackButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.72)',
+    borderWidth: 1,
+    borderColor: colors.line,
+  },
   brand: {
     color: colors.orange,
     fontSize: 24,
     fontWeight: '900',
     letterSpacing: 0,
-    marginBottom: 10,
   },
   title: {
     color: colors.navy,
@@ -786,6 +959,53 @@ const styles = StyleSheet.create({
     lineHeight: 38,
     fontWeight: '900',
     letterSpacing: 0,
+  },
+  guestGuideOverlay: {
+    flex: 1,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(20, 33, 61, 0.34)',
+  },
+  guestGuideCard: {
+    width: '100%',
+    maxWidth: 380,
+    padding: 22,
+    borderRadius: 26,
+    backgroundColor: colors.cardSolid,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.92)',
+    shadowColor: colors.navy,
+    shadowOpacity: 0.14,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 12 },
+    elevation: 8,
+  },
+  guestGuideTitle: {
+    color: colors.navy,
+    fontSize: 21,
+    lineHeight: 29,
+    fontWeight: '900',
+    marginBottom: 10,
+  },
+  guestGuideText: {
+    color: colors.navySoft,
+    fontSize: 14,
+    lineHeight: 22,
+    fontWeight: '700',
+    marginBottom: 20,
+  },
+  guestGuideButton: {
+    height: 52,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.navy,
+  },
+  guestGuideButtonText: {
+    color: colors.white,
+    fontSize: 16,
+    fontWeight: '900',
   },
   schoolSection: {
     marginBottom: 24,
@@ -887,6 +1107,53 @@ const styles = StyleSheet.create({
   },
   childSelectSection: {
     marginBottom: 18,
+  },
+  guestApplyNotice: {
+    padding: 16,
+    borderRadius: 20,
+    backgroundColor: colors.white,
+    gap: 6,
+  },
+  guestApplyNoticeTitle: {
+    color: colors.navy,
+    fontSize: 15,
+    fontWeight: '900',
+  },
+  guestApplyNoticeText: {
+    color: colors.muted,
+    fontSize: 13,
+    lineHeight: 20,
+    fontWeight: '700',
+  },
+  guestAuthActions: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  guestLoginButton: {
+    flex: 1,
+    height: 56,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.navy,
+  },
+  guestLoginButtonText: {
+    color: colors.white,
+    fontSize: 16,
+    fontWeight: '900',
+  },
+  guestSignupButton: {
+    flex: 1,
+    height: 56,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.honey,
+  },
+  guestSignupButtonText: {
+    color: colors.navy,
+    fontSize: 16,
+    fontWeight: '900',
   },
   childSelectTitle: {
     color: colors.navy,

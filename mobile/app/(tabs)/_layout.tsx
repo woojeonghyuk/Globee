@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { router, Tabs } from 'expo-router';
+import { Tabs } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { supabase } from '@/src/lib/supabase';
@@ -41,7 +41,7 @@ function TabIcon({
 export default function TabsLayout() {
   const insets = useSafeAreaInsets();
   const bottomInset = Math.max(insets.bottom, 12);
-  const [hasSession, setHasSession] = useState(false);
+  const [hasSession, setHasSession] = useState<boolean | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -51,16 +51,11 @@ export default function TabsLayout() {
       .then(({ data }) => {
         if (!isMounted) return;
 
-        if (!data.session) {
-          router.replace('/login');
-          return;
-        }
-
-        setHasSession(true);
+        setHasSession(Boolean(data.session));
       })
       .catch(() => {
         if (isMounted) {
-          router.replace('/login');
+          setHasSession(false);
         }
       });
 
@@ -69,13 +64,7 @@ export default function TabsLayout() {
     } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!isMounted) return;
 
-      if (!session) {
-        setHasSession(false);
-        router.replace('/login');
-        return;
-      }
-
-      setHasSession(true);
+      setHasSession(Boolean(session));
     });
 
     return () => {
@@ -84,7 +73,7 @@ export default function TabsLayout() {
     };
   }, []);
 
-  if (!hasSession) return null;
+  if (hasSession === null) return null;
 
   return (
     <Tabs
@@ -117,28 +106,52 @@ export default function TabsLayout() {
         name="applications"
         options={{
           title: '신청',
+          tabBarItemStyle: hasSession ? undefined : { opacity: 0.32 },
           tabBarIcon: (props) => <TabIcon name="applications" {...props} />,
+        }}
+        listeners={{
+          tabPress: (event) => {
+            if (!hasSession) event.preventDefault();
+          },
         }}
       />
       <Tabs.Screen
         name="completed"
         options={{
           title: '완료',
+          tabBarItemStyle: hasSession ? undefined : { opacity: 0.32 },
           tabBarIcon: (props) => <TabIcon name="completed" {...props} />,
+        }}
+        listeners={{
+          tabPress: (event) => {
+            if (!hasSession) event.preventDefault();
+          },
         }}
       />
       <Tabs.Screen
         name="stamps"
         options={{
           title: '스탬프',
+          tabBarItemStyle: hasSession ? undefined : { opacity: 0.32 },
           tabBarIcon: (props) => <TabIcon name="stamps" {...props} />,
+        }}
+        listeners={{
+          tabPress: (event) => {
+            if (!hasSession) event.preventDefault();
+          },
         }}
       />
       <Tabs.Screen
         name="my"
         options={{
           title: '마이',
+          tabBarItemStyle: hasSession ? undefined : { opacity: 0.32 },
           tabBarIcon: (props) => <TabIcon name="my" {...props} />,
+        }}
+        listeners={{
+          tabPress: (event) => {
+            if (!hasSession) event.preventDefault();
+          },
         }}
       />
     </Tabs>
