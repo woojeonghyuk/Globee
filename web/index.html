@@ -310,29 +310,57 @@
       </section>
     </main>
 
-    <div class="qr-modal" id="download-qr" role="dialog" aria-labelledby="qr-title">
+    <div class="qr-modal" id="download-qr" role="dialog" aria-modal="true" aria-labelledby="qr-title">
       <a class="qr-backdrop" href="#" aria-label="QR 팝업 닫기"></a>
       <div class="qr-dialog">
         <a class="qr-close" href="#" aria-label="닫기">×</a>
         <p class="eyebrow">App Download</p>
         <h2 id="qr-title">Globee 앱 다운로드</h2>
         <p class="qr-copy">
-          Google Play에서 먼저 받을 수 있어요.<br />
-          App Store는 준비 중입니다.
+          사용 중인 기기에 맞는 스토어에서<br />
+          Globee를 만나보세요.
         </p>
-        <img
-          class="qr-image"
-          src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Dcom.globee.parent"
-          alt="Globee Google Play 다운로드 QR 코드"
-        />
-        <a
-          class="store-link"
-          href="https://play.google.com/store/apps/details?id=com.globee.parent"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Google Play에서 열기
-        </a>
+        <div class="store-grid">
+          <article class="store-card">
+            <span class="store-platform">Android</span>
+            <strong class="store-name">Google Play</strong>
+            <img
+              class="qr-image"
+              src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&amp;data=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Dcom.globee.parent"
+              alt="Globee Google Play 다운로드 QR 코드"
+            />
+            <a
+              class="store-link"
+              href="https://play.google.com/store/apps/details?id=com.globee.parent"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Google Play에서 받기
+            </a>
+          </article>
+
+          <article class="store-card">
+            <span class="store-platform">iPhone</span>
+            <strong class="store-name">App Store</strong>
+            <img
+              class="qr-image"
+              src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&amp;data=https%3A%2F%2Fapps.apple.com%2Fkr%2Fapp%2Fglobee%2Fid6792293681"
+              alt="Globee App Store 다운로드 QR 코드"
+            />
+            <a
+              class="store-link"
+              href="https://apps.apple.com/kr/app/globee/id6792293681"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              App Store에서 받기
+            </a>
+          </article>
+        </div>
+        <p class="qr-help">
+          <span class="desktop-only">QR 코드를 스캔하거나 버튼을 눌러 바로 이동할 수 있어요.</span>
+          <span class="mobile-only">버튼을 눌러 원하는 스토어로 바로 이동할 수 있어요.</span>
+        </p>
       </div>
     </div>
 

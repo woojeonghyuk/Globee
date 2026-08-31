@@ -944,6 +944,7 @@ h2 {
   inset: 0;
   justify-content: center;
   opacity: 0;
+  overflow-y: auto;
   padding: 24px;
   pointer-events: none;
   position: fixed;
@@ -968,11 +969,13 @@ h2 {
   border: 1px solid var(--line);
   border-radius: 24px;
   box-shadow: 0 30px 90px rgba(30, 24, 16, 0.28);
-  max-width: 460px;
+  max-height: calc(100dvh - 48px);
+  max-width: 680px;
+  overflow-y: auto;
   padding: 30px;
   position: relative;
   text-align: center;
-  width: min(100%, 460px);
+  width: min(100%, 680px);
 }
 
 .qr-dialog h2 {
@@ -981,11 +984,10 @@ h2 {
 
 .qr-copy {
   color: var(--ink-soft);
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 700;
   margin: 0 auto;
   max-width: 360px;
-  white-space: nowrap;
 }
 
 .qr-close {
@@ -1005,14 +1007,43 @@ h2 {
   width: 38px;
 }
 
-.qr-image {
+.store-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 24px;
+}
+
+.store-card {
+  align-items: center;
   background: #ffffff;
   border: 1px solid var(--line);
   border-radius: 18px;
-  height: 220px;
-  margin: 20px auto 0;
-  padding: 12px;
-  width: 220px;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+
+.store-platform {
+  color: var(--ink-soft);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.store-name {
+  color: var(--ink);
+  font-size: 20px;
+  margin-top: 3px;
+}
+
+.qr-image {
+  background: #ffffff;
+  height: 180px;
+  margin: 16px auto 0;
+  padding: 8px;
+  width: 180px;
 }
 
 .store-link {
@@ -1024,14 +1055,26 @@ h2 {
   font-size: 15px;
   font-weight: 900;
   justify-content: center;
-  margin-top: 18px;
+  margin-top: 16px;
   min-height: 46px;
   padding: 0 20px;
+  width: 100%;
 }
 
 .store-link:hover {
   box-shadow: 0 10px 24px rgba(30, 24, 16, 0.22);
   transform: translateY(-2px);
+}
+
+.qr-help {
+  color: var(--ink-soft);
+  font-size: 12px;
+  font-weight: 700;
+  margin: 16px 0 0;
+}
+
+.mobile-only {
+  display: none;
 }
 
 .footer-grid {
@@ -1266,6 +1309,42 @@ h2 {
 
   .brand img {
     width: 120px;
+  }
+
+  .qr-modal {
+    align-items: flex-start;
+    padding: 14px;
+  }
+
+  .qr-dialog {
+    border-radius: 20px;
+    margin: auto;
+    max-height: calc(100dvh - 28px);
+    padding: 28px 18px 20px;
+  }
+
+  .qr-dialog h2 {
+    font-size: 26px;
+  }
+
+  .store-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .store-card {
+    padding: 16px;
+  }
+
+  .qr-image {
+    display: none;
+  }
+
+  .desktop-only {
+    display: none;
+  }
+
+  .mobile-only {
+    display: inline;
   }
 
   .landing-hero {
