@@ -2,7 +2,7 @@
 
   <img src="./mobile/assets/images/globee-app-icon.png" width="400" alt="Globee 앱 아이콘" />
 
-  <h3><big>동네에서 떠나는 세계여행 🌏</big></h3>
+  <h3><big>동네에서 떠나는 세계여행 </big></h3>
 
   <h3>
     초등학생들의 부족한 국제문화 경험을<br />
@@ -83,7 +83,7 @@
   <img src="./docs/assets/achievements/bottom-achievement-captions.svg" width="96%" alt="2026 KDB 창업교육 프로그램 우수상, 2026 KDB 소셜임팩트 창업 공모전 최우수상" />
 </p>
 
-### 📰 언론 보도
+###  언론 보도
 
 > [동아일보](https://www.donga.com/news/It/article/all/20260716/134310570/1) · [IT동아](https://it.donga.com/109200/) · [동아 비즈N](https://bizn.donga.com/List/3/all/20260716/134310570/2) · [네이버 블로그](https://blog.naver.com/itdonga_me/224348261820) · [다음뉴스](https://v.daum.net/v/20260716105103066) · [네이트뉴스](https://news.nate.com/view/20260716n12482)
 
@@ -91,97 +91,117 @@
 
 ---
 
+<div align="center">
 
-## Project Structure
+  <h3><big> 기술 스택</big></h3>
+
+  <p>
+    <img src="https://img.shields.io/badge/Expo-000020?style=for-the-badge&amp;logo=expo&amp;logoColor=white" alt="Expo" />
+    <img src="https://img.shields.io/badge/React_Native-20232A?style=for-the-badge&amp;logo=react&amp;logoColor=61DAFB" alt="React Native" />
+    <img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&amp;logo=typescript&amp;logoColor=white" alt="TypeScript" />
+    <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&amp;logo=react&amp;logoColor=61DAFB" alt="React" />
+    <img src="https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&amp;logo=vite&amp;logoColor=white" alt="Vite" />
+  </p>
+  <p>
+    <img src="https://img.shields.io/badge/Supabase-3FCF8E?style=for-the-badge&amp;logo=supabase&amp;logoColor=white" alt="Supabase" />
+    <img src="https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&amp;logo=postgresql&amp;logoColor=white" alt="PostgreSQL" />
+    <img src="https://img.shields.io/badge/Vercel-000000?style=for-the-badge&amp;logo=vercel&amp;logoColor=white" alt="Vercel" />
+    <img src="https://img.shields.io/badge/EAS_Build-000020?style=for-the-badge&amp;logo=expo&amp;logoColor=white" alt="EAS Build" />
+    <img src="https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&amp;logo=github-actions&amp;logoColor=white" alt="GitHub Actions" />
+  </p>
+
+</div>
+
+| 영역 | 기술 | 적용 범위 |
+| :--- | :--- | :--- |
+| **Mobile** | Expo, React Native, Expo Router, TypeScript | 보호자 앱, 인증, 신청, 문화 기록, 스탬프 |
+| **Admin Web** | React, Vite, TypeScript | 신청 승인, 완료문화·사진 등록, 운영 데이터 관리 |
+| **Backend** | Supabase Auth, PostgreSQL, Storage, Realtime, RPC | 인증, 데이터, 이미지 저장, 실시간 동기화 |
+| **Serverless** | Supabase Edge Functions, Twilio, KakaoWork | 계정 삭제, SMS 인증, 신규 신청 알림 |
+| **Deploy & CI** | Vercel, EAS Build, GitHub Actions | 웹 배포, 모바일 빌드, 자동 품질 검사 |
+
+---
+
+<div align="center">
+
+  <h3><big> 서비스 구조</big></h3>
+
+</div>
+
+```mermaid
+flowchart LR
+    Parent["보호자 앱<br/>Expo + React Native"]
+    Admin["운영진 웹<br/>React + Vite"]
+    Public["공개 웹사이트<br/>Vercel"]
+
+    subgraph Backend["Supabase Backend"]
+        API["Data API"]
+        Auth["Auth"]
+        DB[("PostgreSQL")]
+        Storage["Storage"]
+        Edge["Edge Functions"]
+
+        API --> Auth
+        API --> DB
+        API --> Storage
+        API --> Edge
+    end
+
+    Parent -->|인증 · 조회 · 신청| API
+    Admin -->|승인 · 기록 · 운영| API
+    Auth --> Twilio["Twilio SMS"]
+    Edge --> KakaoWork["KakaoWork 알림"]
+    Public --> Stores["App Store · Google Play"]
+```
+
+---
+
+<div align="center">
+
+  <h3><big> 저장소 구성</big></h3>
+
+</div>
 
 ```text
-mobile/      Expo + React Native 학부모 앱
-admin-web/   Vite + React 운영진 웹
-web/         공개 웹사이트, 개인정보처리방침, 이용약관, 계정 삭제 안내
-supabase/    SQL 마이그레이션, RLS 정책, Edge Functions
+Globee/
+├── mobile/       Expo + React Native 보호자 앱
+├── admin-web/    React + Vite 운영진 웹
+├── web/          서비스 소개, 약관, 개인정보처리방침, 계정 삭제 안내
+└── supabase/     SQL 마이그레이션, RLS 정책, Edge Functions
 ```
 
-## Main Stack
+### 구현 범위
 
-- Mobile: Expo, React Native, Expo Router
-- Admin Web: React, Vite, TypeScript
-- Backend: Supabase Auth, PostgreSQL, Storage, Realtime, RPC, Edge Functions
-- SMS OTP: Supabase Phone Auth + Twilio
-- Operator Alerts: KakaoWork Incoming Webhook through Supabase Edge Functions
-- Public/Admin Web Deploy: Vercel
-- Mobile Build: EAS Build
+- 전화번호 인증 기반 회원가입·로그인·비밀번호 재설정
+- 비회원 문화교류 탐색과 회원 전용 자녀 등록·신청 흐름
+- 신청 확인·승인·취소·완료·미참여 상태 관리
+- 완료문화 사진·일지와 국가별 스탬프 기록
+- 보호자 필수 동의 및 선택적 활동 사진 동의 관리
+- 운영진 대시보드와 신규 신청 KakaoWork 알림
+- 앱 내 계정 삭제와 공개 개인정보처리방침·이용약관 제공
 
-## Important URLs
+---
 
-- Public site: `https://globee.ai.kr/`
-- Admin web: `https://globee-admin.vercel.app/`
-- Supabase project: `https://emuvubzjxdfdonjrabaw.supabase.co`
+<div align="center">
 
-## Security Notes
+  <h3><big> 품질과 보안</big></h3>
 
-- Do not commit `.env`, `.env.local`, service role keys, or secret keys.
-- Use `.env.example` files only as key-name references. Never put real values in example files.
-- Mobile and admin web may only use Supabase URL and anon/publishable key.
-- Supabase service role key is used only inside Edge Functions through Supabase environment variables.
-- KakaoWork webhook URLs are stored only as Supabase Secrets.
-- Admin web session persistence is disabled, so operators must log in again after closing or refreshing the page.
-- Test OTP entries in Supabase Auth should stay empty before production release.
+</div>
 
-## Environment Files
+- 모든 공개 데이터 테이블에 Row Level Security 정책 적용
+- 서비스 키와 Webhook은 클라이언트가 아닌 서버 환경에서만 관리
+- 보호자 동의 상태에 따라 활동 사진 등록과 제공을 제한
+- GitHub Actions로 모바일 타입 검사·Lint, 운영진 웹 빌드, 공개 웹 링크를 자동 검증
+- 모바일 릴리즈와 웹·백엔드 배포 경로를 분리해 운영 앱의 안정성 보호
 
-```text
-mobile/.env.local      EXPO_PUBLIC_SUPABASE_URL, EXPO_PUBLIC_SUPABASE_ANON_KEY
-admin-web/.env.local   VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY
-supabase secrets       SUPABASE_SERVICE_ROLE_KEY, KAKAOWORK_WEBHOOK_URL
-```
+<br />
 
-Tracked `.env.example` files document the required key names only. Real values stay in local `.env.local`, EAS environment variables, Vercel environment variables, or Supabase Secrets.
+<div align="center">
 
-## Common Checks
+  <a href="https://github.com/woojeonghyuk/Globee/actions/workflows/ci.yml">
+    <img src="https://github.com/woojeonghyuk/Globee/actions/workflows/ci.yml/badge.svg" alt="Globee CI" />
+  </a>
 
-GitHub에 push하거나 PR을 만들면 GitHub Actions `CI`가 아래 검사를 자동으로 실행합니다.
+  <p><b>Globee — 아이의 첫 세계를 연결합니다.</b></p>
 
-- 추적되면 안 되는 파일 검사: `.env`, `node_modules`, `.vercel`, `.eas`, `dist`, `build`
-- 모바일 앱: TypeScript 타입체크, ESLint
-- 운영진 웹: production build
-- 공개 웹사이트: 로컬 링크와 이미지 참조 확인
-
-로컬에서 직접 확인할 때는 아래 명령을 사용합니다.
-
-```bash
-cd mobile
-npx.cmd tsc --noEmit
-npm.cmd run lint
-```
-
-```bash
-cd admin-web
-npx.cmd tsc --noEmit
-```
-
-운영진 웹의 실제 릴리즈 출력까지 확인해야 할 때만 빌드를 실행합니다.
-
-```bash
-cd admin-web
-npm.cmd run build
-```
-
-공개 웹사이트는 정적 HTML/CSS라 별도 빌드가 없습니다. 링크와 이미지 참조는 GitHub Actions에서 확인합니다.
-
-## Launch Flow
-
-1. Apply new SQL files in `supabase/sql` through Supabase SQL Editor.
-2. Deploy changed Edge Functions.
-3. Push code to GitHub so Vercel redeploys `web` and `admin-web`.
-4. Confirm GitHub Actions `CI` passed on GitHub.
-5. Build Android preview APK with EAS and test on a real Android device.
-6. Build production AAB and submit through Google Play Console.
-
-## Release Discipline
-
-- 운영진 웹과 공개 웹사이트는 GitHub `main`에 push하면 Vercel이 자동 배포합니다.
-- 모바일 앱은 Google Play에 올라가는 릴리즈이므로 자동 배포하지 않고, EAS production build를 수동으로 실행합니다.
-- 출시된 모바일 앱의 문구, 디자인, JavaScript 수정은 EAS Update의 `preview` 채널에서 먼저 확인한 뒤 `production` 채널로 배포합니다.
-- 앱 아이콘, 네이티브 스플래시, 권한, native library 변경은 OTA로 확인할 수 없으므로 새 APK/AAB 빌드가 필요합니다.
-- Supabase SQL과 Edge Functions는 자동 적용하지 않습니다. DB 변경은 SQL Editor에서 실행하고, 함수 변경은 Supabase CLI로 배포한 뒤 테스트합니다.
-- 새 기능을 넣을 때는 `mobile`, `admin-web`, `supabase`, `web` 중 영향을 받는 폴더의 README도 함께 갱신합니다.
+</div>
