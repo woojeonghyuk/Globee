@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="78" viewBox="0 0 1000 78" role="img" aria-labelledby="title desc">
+  <title id="title">하단 주요 성과 설명</title>
+  <desc id="desc">2026 KDB 창업교육 프로그램 상반기 성과공유회 우수상, 2026 KDB 소셜임팩트 창업 공모전 최우수상</desc>
+  <style>
+    text { fill: #24292f; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 21px; font-weight: 700; }
+    @media (prefers-color-scheme: dark) { text { fill: #f0f6fc; } }
+  </style>
+  <text x="245" y="28" text-anchor="middle">2026 KDB 창업교육 프로그램</text>
+  <text x="245" y="58" text-anchor="middle">상반기 성과공유회 우수상</text>
+  <text x="755" y="28" text-anchor="middle">2026 KDB 소셜임팩트 창업 공모전</text>
+  <text x="755" y="58" text-anchor="middle">최우수상</text>
+</svg>

@@ -1,20 +1,19 @@
 <div align="center">
 
-  <img src="./mobile/assets/images/globee-app-icon.png" width="160" alt="Globee 앱 아이콘" />
+  <img src="./mobile/assets/images/globee-app-icon.png" width="400" alt="Globee 앱 아이콘" />
 
-  <h1>Globee</h1>
+  <h3><big>동네에서 떠나는 세계여행 🌏</big></h3>
 
-  <h3>동네에서 떠나는 세계여행 🌏</h3>
-
-  <p>
+  <h3>
     초등학생들의 부족한 국제문화 경험을<br />
     국내 외국인 유학생과의 오프라인 문화체험으로 해결하는 앱
-  </p>
+  </h3>
 
   <p>
     <a href="https://play.google.com/store/apps/details?id=com.globee.parent">
       <img src="https://img.shields.io/badge/Google_Play-414141?style=for-the-badge&logo=google-play&logoColor=white" alt="Google Play에서 다운로드" />
     </a>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     <a href="https://apps.apple.com/kr/app/globee/id6792293681">
       <img src="https://img.shields.io/badge/App_Store-0D96F6?style=for-the-badge&logo=app-store&logoColor=white" alt="App Store에서 다운로드" />
     </a>
@@ -39,9 +38,54 @@
     </tr>
   </table>
 
+  <br />
+
+  <a href="https://globee.ai.kr/">
+    <img src="./mobile/assets/images/globee-wordmark.png" width="220" alt="Globee" />
+  </a>
+
+  <h3>
+    <a href="https://globee.ai.kr/"><big>공식 웹사이트 방문하기</big></a>
+  </h3>
+
+  <p>
+    <a href="https://globee-admin.vercel.app/"><b>관리자 페이지</b></a>
+  </p>
+
 </div>
 
 ---
+
+<div align="center">
+
+  <h3><big> 주요 성과</big></h3>
+
+</div>
+
+<br />
+<br />
+
+<p align="center">
+  <img src="./docs/assets/achievements/u300-final-selection.png" width="47%" alt="학생 창업유망팀 300+ U300" />
+  &nbsp;&nbsp;
+  <img src="./docs/assets/achievements/everyone-startup.png" width="47%" alt="모두의 창업" />
+  <br />
+  <img src="./docs/assets/achievements/top-achievement-captions.svg" width="96%" alt="학생 창업유망팀 300+ 최종 선발, 모두의 창업 선발" />
+</p>
+
+<br />
+
+<p align="center">
+  <img src="./docs/assets/achievements/kdb-education-program-award.jpg" width="47%" alt="2026 KDB 창업교육 프로그램 상반기 성과공유회 우수상" />
+  &nbsp;&nbsp;
+  <img src="./docs/assets/achievements/kdb-social-impact-grand-prize.jpg" width="47%" alt="2026 KDB 소셜임팩트 창업 공모전 최우수상" />
+  <br />
+  <img src="./docs/assets/achievements/bottom-achievement-captions.svg" width="96%" alt="2026 KDB 창업교육 프로그램 우수상, 2026 KDB 소셜임팩트 창업 공모전 최우수상" />
+</p>
+
+### 📰 언론 보도
+
+> [동아일보](https://www.donga.com/news/It/article/all/20260716/134310570/1) · [IT동아](https://it.donga.com/109200/) · [동아 비즈N](https://bizn.donga.com/List/3/all/20260716/134310570/2) · [네이버 블로그](https://blog.naver.com/itdonga_me/224348261820) · [다음뉴스](https://v.daum.net/v/20260716105103066) · [네이트뉴스](https://news.nate.com/view/20260716n12482)
 
 ## Project Structure
 
