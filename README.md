@@ -1,6 +1,47 @@
-# Globee
+<div align="center">
 
-Globee는 아이들이 가까운 유학생 선생님과 나라별 문화, 음식, 놀이, 언어를 자연스럽게 경험하고 가족이 그 기록을 모아가는 학부모 앱과 운영진 웹입니다.
+  <img src="./mobile/assets/images/globee-app-icon.png" width="160" alt="Globee 앱 아이콘" />
+
+  <h1>Globee</h1>
+
+  <h3>동네에서 떠나는 세계여행 🌏</h3>
+
+  <p>
+    초등학생들의 부족한 국제문화 경험을<br />
+    국내 외국인 유학생과의 오프라인 문화체험으로 해결하는 앱
+  </p>
+
+  <p>
+    <a href="https://play.google.com/store/apps/details?id=com.globee.parent">
+      <img src="https://img.shields.io/badge/Google_Play-414141?style=for-the-badge&logo=google-play&logoColor=white" alt="Google Play에서 다운로드" />
+    </a>
+    <a href="https://apps.apple.com/kr/app/globee/id6792293681">
+      <img src="https://img.shields.io/badge/App_Store-0D96F6?style=for-the-badge&logo=app-store&logoColor=white" alt="App Store에서 다운로드" />
+    </a>
+  </p>
+
+  <table>
+    <tr>
+      <td align="center">
+        <a href="https://play.google.com/store/apps/details?id=com.globee.parent">
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&amp;data=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Dcom.globee.parent" width="140" alt="Globee Google Play 다운로드 QR 코드" />
+        </a>
+        <br />
+        <sub><b>Google Play</b></sub>
+      </td>
+      <td align="center">
+        <a href="https://apps.apple.com/kr/app/globee/id6792293681">
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&amp;data=https%3A%2F%2Fapps.apple.com%2Fkr%2Fapp%2Fglobee%2Fid6792293681" width="140" alt="Globee App Store 다운로드 QR 코드" />
+        </a>
+        <br />
+        <sub><b>App Store</b></sub>
+      </td>
+    </tr>
+  </table>
+
+</div>
+
+---
 
 ## Project Structure
 
