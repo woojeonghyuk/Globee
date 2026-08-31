@@ -33,6 +33,12 @@ const activeStatuses = new Set<ApplicationStatus>([
   'waiting',
   'confirmed',
 ]);
+const photoParticipantStatuses = new Set<ApplicationStatus>([
+  'confirmed',
+  'completed',
+]);
+const currentPrivacyPolicyVersion = '2026-08-05';
+const currentTermsVersion = '2026-08-05';
 
 type AdminView =
   | 'dashboard'
@@ -57,6 +63,13 @@ type ProfileRow = {
   role: 'admin' | 'parent';
   full_name: string | null;
   phone: string | null;
+};
+
+type GuardianConsentRow = {
+  id: string;
+  parent_id: string;
+  activity_photo_agreed: boolean;
+  created_at: string;
 };
 
 type ChildRow = {
@@ -534,6 +547,9 @@ function App() {
   const [profiles, setProfiles] = useState<ProfileRow[]>([]);
   const [children, setChildren] = useState<ChildRow[]>([]);
   const [classes, setClasses] = useState<ClassRow[]>([]);
+  const [photoConsentByParentId, setPhotoConsentByParentId] = useState<
+    Map<string, boolean>
+  >(new Map());
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [form, setForm] = useState<CompletionForm>(initialCompletionForm);
   const [photoPreviews, setPhotoPreviews] = useState<CompletionPhotoPreview[]>([]);
@@ -555,6 +571,28 @@ function App() {
     [applications, selectedId],
   );
   const selectedApplicationId = selectedApplication?.id ?? null;
+  const selectedClassPhotoParticipants = useMemo(
+    () =>
+      selectedApplication
+        ? applications.filter(
+            (application) =>
+              application.class_id === selectedApplication.class_id &&
+              photoParticipantStatuses.has(application.status),
+          )
+        : [],
+    [applications, selectedApplication],
+  );
+  const selectedClassPhotoMissingConsentCount = useMemo(
+    () =>
+      selectedClassPhotoParticipants.filter(
+        (application) =>
+          photoConsentByParentId.get(application.parent_id) !== true,
+      ).length,
+    [photoConsentByParentId, selectedClassPhotoParticipants],
+  );
+  const selectedClassAllowsPhotoUpload =
+    selectedClassPhotoParticipants.length > 0 &&
+    selectedClassPhotoMissingConsentCount === 0;
 
   const selectedCompletion = useMemo(
     () =>
@@ -801,6 +839,7 @@ function App() {
       setProfiles([]);
       setChildren([]);
       setClasses([]);
+      setPhotoConsentByParentId(new Map());
       setSelectedId(null);
       return;
     }
@@ -818,6 +857,7 @@ function App() {
       setProfiles([]);
       setChildren([]);
       setClasses([]);
+      setPhotoConsentByParentId(new Map());
       setSelectedId(null);
       setLoginError('운영진 계정만 접속할 수 있어요.');
       return;
@@ -843,6 +883,7 @@ function App() {
       profilesResponse,
       childrenResponse,
       classesResponse,
+      guardianConsentsResponse,
     ] =
       await Promise.all([
         supabase
@@ -857,6 +898,13 @@ function App() {
           .from('classes')
           .select('id,title,country,flag,campus,teacher_name,starts_at,is_open')
           .order('starts_at', { ascending: true }),
+        supabase
+          .from('guardian_consent_records')
+          .select('id,parent_id,activity_photo_agreed,created_at')
+          .eq('privacy_policy_version', currentPrivacyPolicyVersion)
+          .eq('terms_version', currentTermsVersion)
+          .order('created_at', { ascending: false })
+          .order('id', { ascending: false }),
       ]);
 
     if (shouldShowLoading) {
@@ -899,6 +947,15 @@ function App() {
       return;
     }
 
+    if (guardianConsentsResponse.error) {
+      if (shouldShowErrors) {
+        setMessage(
+          `보호자 사진 동의를 불러오지 못했어요. ${guardianConsentsResponse.error.message}`,
+        );
+      }
+      return;
+    }
+
     const nextApplications = (
       (applicationsResponse.data ?? []) as unknown as ApplicationRow[]
     ).filter((application) => application.classes);
@@ -907,6 +964,18 @@ function App() {
     setProfiles((profilesResponse.data ?? []) as ProfileRow[]);
     setChildren((childrenResponse.data ?? []) as ChildRow[]);
     setClasses((classesResponse.data ?? []) as ClassRow[]);
+    const nextPhotoConsentByParentId = new Map<string, boolean>();
+
+    for (const consent of (guardianConsentsResponse.data ?? []) as GuardianConsentRow[]) {
+      if (!nextPhotoConsentByParentId.has(consent.parent_id)) {
+        nextPhotoConsentByParentId.set(
+          consent.parent_id,
+          consent.activity_photo_agreed,
+        );
+      }
+    }
+
+    setPhotoConsentByParentId(nextPhotoConsentByParentId);
 
     setSelectedId((currentSelectedId) => {
       const selectableApplications = nextApplications.filter(
@@ -997,6 +1066,11 @@ function App() {
         { event: '*', schema: 'public', table: 'profiles' },
         scheduleRefresh,
       )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'guardian_consent_records' },
+        scheduleRefresh,
+      )
       .subscribe();
 
     const handleFocus = () => {
@@ -1037,6 +1111,15 @@ function App() {
     });
     setRemovedPhotoIds(new Set());
   }, [selectedApplicationId]);
+
+  useEffect(() => {
+    if (selectedClassAllowsPhotoUpload) return;
+
+    setPhotoPreviews((current) => {
+      current.forEach((preview) => URL.revokeObjectURL(preview.previewUrl));
+      return [];
+    });
+  }, [selectedClassAllowsPhotoUpload]);
 
   useEffect(() => {
     return () => {
@@ -1576,6 +1659,15 @@ function App() {
 
     if (!selectedFiles.length) return;
 
+    if (!selectedClassAllowsPhotoUpload) {
+      setMessage(
+        selectedClassPhotoMissingConsentCount > 0
+          ? `같은 문화교류 참석자 중 사진 미동의 또는 미확인 ${selectedClassPhotoMissingConsentCount}명이 있어 사진을 올릴 수 없어요.`
+          : '사진을 올릴 수 있는 참석자가 없어요.',
+      );
+      return;
+    }
+
     const invalidFile = selectedFiles.find(
       (file) =>
         !isAllowedCompletionPhoto(file) ||
@@ -1752,6 +1844,13 @@ function App() {
 
     if (visibleExistingPhotos.length + photoPreviews.length > maxCompletionPhotoCount) {
       setMessage(`사진은 최대 ${maxCompletionPhotoCount}장까지 올릴 수 있어요.`);
+      return;
+    }
+
+    if (photoPreviews.length > 0 && !selectedClassAllowsPhotoUpload) {
+      setMessage(
+        `같은 문화교류 참석자 중 사진 미동의 또는 미확인 ${selectedClassPhotoMissingConsentCount}명이 있어 사진을 올릴 수 없어요.`,
+      );
       return;
     }
 
@@ -2355,6 +2454,7 @@ function App() {
                           multiple
                           disabled={
                             saving ||
+                            !selectedClassAllowsPhotoUpload ||
                             visibleExistingPhotos.length + photoPreviews.length >=
                               maxCompletionPhotoCount
                           }
@@ -2362,8 +2462,11 @@ function App() {
                         />
                       </label>
                       <p>
-                        JPG, PNG, WEBP 형식으로 최대 {maxCompletionPhotoCount}장,
-                        한 장당 5MB까지 올릴 수 있어요.
+                        {selectedClassAllowsPhotoUpload
+                          ? `JPG, PNG, WEBP 형식으로 최대 ${maxCompletionPhotoCount}장, 한 장당 5MB까지 올릴 수 있어요.`
+                          : selectedClassPhotoMissingConsentCount > 0
+                            ? `같은 문화교류 참석자 중 사진 미동의 또는 미확인 ${selectedClassPhotoMissingConsentCount}명이 있어 수업 사진을 업로드할 수 없어요.`
+                            : '사진을 올릴 수 있는 참석자가 없어요.'}
                       </p>
 
                       {existingPhotos.length > 0 || photoPreviews.length > 0 ? (

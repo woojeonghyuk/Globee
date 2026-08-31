@@ -12,6 +12,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
 
 import BrandWordmark from '@/src/components/BrandWordmark';
@@ -28,7 +29,7 @@ import {
 import { goBackOrStart } from '@/src/lib/navigation';
 import { supabase } from '@/src/lib/supabase';
 import { useAuthScreenBackHandler } from '@/src/lib/useAuthScreenBackHandler';
-import { colors } from '@/src/theme/colors';
+import { authColors } from '@/src/theme/auth';
 
 type ResetStep = 'phone' | 'code' | 'password';
 
@@ -58,8 +59,8 @@ export default function ResetPasswordScreen() {
   const [resendRemainingSeconds, setResendRemainingSeconds] = useState(0);
   const isWideAndroid = Platform.OS === 'android' && width >= 520;
   const bottomPadding = Math.max(
-    insets.bottom + 28,
-    isWideAndroid ? 92 : 42,
+    insets.bottom + 20,
+    isWideAndroid ? 84 : 20,
   );
 
   useEffect(() => {
@@ -242,13 +243,6 @@ export default function ResetPasswordScreen() {
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <View style={styles.bgCircleTop} />
-        <View style={styles.bgCircleBottom} />
-
-        <Pressable onPress={goBackOrStart} style={styles.backButton} hitSlop={10}>
-          <Text style={styles.backText}>←</Text>
-        </Pressable>
-
         <ScrollView
           alwaysBounceVertical={false}
           bounces={false}
@@ -257,29 +251,41 @@ export default function ResetPasswordScreen() {
           overScrollMode="never"
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.headerArea}>
-            <BrandWordmark width={148} style={styles.brandLogo} />
-            <Text style={styles.title}>비밀번호 찾기</Text>
-            <Text style={styles.subtitle}>
-              전화번호를 인증한 뒤 새 비밀번호를 설정해주세요
-            </Text>
-          </View>
+          <View style={styles.mainArea}>
+            <Pressable
+              onPress={goBackOrStart}
+              style={({ pressed }) => [
+                styles.backButton,
+                pressed && styles.buttonPressed,
+              ]}
+              hitSlop={10}
+            >
+              <Ionicons name="arrow-back" size={28} color={authColors.navy} />
+            </Pressable>
 
-          <View style={styles.formArea}>
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>전화번호(보호자)</Text>
-              <TextInput
-                value={phone}
-                onChangeText={(value) => setPhone(formatKoreanPhoneInput(value))}
-                placeholder="휴대폰 번호를 입력해주세요"
-                placeholderTextColor={colors.muted}
-                keyboardType="phone-pad"
-                editable={step === 'phone' && !isSubmitting}
-                style={styles.input}
-                textContentType="telephoneNumber"
-                autoComplete="tel"
-              />
+            <View style={styles.headerArea}>
+              <BrandWordmark width={157} style={styles.brandLogo} />
+              <Text style={styles.title}>비밀번호 찾기</Text>
+              <Text style={styles.subtitle}>
+                전화번호를 인증한 뒤 새 비밀번호를 설정해주세요
+              </Text>
             </View>
+
+            <View style={styles.formArea}>
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>전화번호 (보호자)</Text>
+                <TextInput
+                  value={phone}
+                  onChangeText={(value) => setPhone(formatKoreanPhoneInput(value))}
+                  placeholder="휴대폰 번호를 입력해주세요"
+                  placeholderTextColor={authColors.placeholder}
+                  keyboardType="phone-pad"
+                  editable={step === 'phone' && !isSubmitting}
+                  style={styles.input}
+                  textContentType="telephoneNumber"
+                  autoComplete="tel"
+                />
+              </View>
 
             {step !== 'phone' && (
               <View style={styles.inputGroup}>
@@ -288,7 +294,7 @@ export default function ResetPasswordScreen() {
                   value={verificationCode}
                   onChangeText={setVerificationCode}
                   placeholder="문자로 받은 인증번호를 입력해주세요"
-                  placeholderTextColor={colors.muted}
+                  placeholderTextColor={authColors.placeholder}
                   keyboardType="number-pad"
                   maxLength={8}
                   editable={step === 'code' && !isSubmitting}
@@ -336,7 +342,7 @@ export default function ResetPasswordScreen() {
                     value={password}
                     onChangeText={setPassword}
                     placeholder="8~20자로 입력해주세요"
-                    placeholderTextColor={colors.muted}
+                    placeholderTextColor={authColors.placeholder}
                     secureTextEntry
                     maxLength={20}
                     style={styles.input}
@@ -352,7 +358,7 @@ export default function ResetPasswordScreen() {
                     value={passwordConfirm}
                     onChangeText={setPasswordConfirm}
                     placeholder="새 비밀번호를 다시 입력해주세요"
-                    placeholderTextColor={colors.muted}
+                    placeholderTextColor={authColors.placeholder}
                     secureTextEntry
                     maxLength={20}
                     style={styles.input}
@@ -364,17 +370,18 @@ export default function ResetPasswordScreen() {
               </>
             )}
 
-            <Pressable
-              disabled={isSubmitting}
-              style={({ pressed }) => [
-                styles.resetButton,
-                isSubmitting && styles.resetButtonDisabled,
-                pressed && styles.buttonPressed,
-              ]}
-              onPress={handlePrimaryAction}
-            >
-              <Text style={styles.resetButtonText}>{primaryButtonText}</Text>
-            </Pressable>
+              <Pressable
+                disabled={isSubmitting}
+                style={({ pressed }) => [
+                  styles.resetButton,
+                  isSubmitting && styles.resetButtonDisabled,
+                  pressed && styles.buttonPressed,
+                ]}
+                onPress={handlePrimaryAction}
+              >
+                <Text style={styles.resetButtonText}>{primaryButtonText}</Text>
+              </Pressable>
+            </View>
           </View>
 
           <View style={styles.footerArea}>
@@ -391,98 +398,76 @@ export default function ResetPasswordScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: authColors.background,
   },
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: authColors.background,
     overflow: 'hidden',
   },
-  bgCircleTop: {
-    position: 'absolute',
-    top: -60,
-    right: -50,
-    width: 220,
-    height: 220,
-    borderRadius: 999,
-    backgroundColor: '#DDEDFC',
-    opacity: 0.95,
-  },
-  bgCircleBottom: {
-    position: 'absolute',
-    bottom: -150,
-    left: -90,
-    width: 250,
-    height: 250,
-    borderRadius: 999,
-    backgroundColor: '#F7EBA6',
-    opacity: 0.95,
-  },
   backButton: {
-    position: 'absolute',
-    top: 54,
-    left: 22,
-    width: 44,
-    height: 44,
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    borderWidth: 1,
+    borderColor: authColors.navy,
     alignItems: 'center',
     justifyContent: 'center',
-    zIndex: 3,
-  },
-  backText: {
-    color: colors.navy,
-    fontSize: 35,
-    fontWeight: '700',
+    marginBottom: 40,
   },
   content: {
     flexGrow: 1,
-    paddingHorizontal: 30,
-    paddingTop: 78,
-    paddingBottom: 30,
+    paddingHorizontal: 20,
+    paddingTop: 20,
     justifyContent: 'space-between',
   },
+  mainArea: {
+    width: '100%',
+  },
   headerArea: {
-    alignItems: 'center',
-    marginTop: 4,
+    alignItems: 'flex-start',
   },
   brandLogo: {
-    marginBottom: 16,
+    marginBottom: 20,
   },
   title: {
-    color: colors.navy,
-    fontSize: 26,
+    color: authColors.text,
+    fontFamily: 'Pretendard-Bold',
+    fontSize: 20,
     lineHeight: 30,
-    fontWeight: '900',
-    letterSpacing: 0,
-    textAlign: 'center',
-    marginBottom: 10,
+    letterSpacing: -0.6,
+    marginBottom: 8,
   },
   subtitle: {
-    color: colors.muted,
-    fontSize: 15,
+    color: authColors.textMuted,
+    fontFamily: 'Pretendard-Medium',
+    fontSize: 16,
     lineHeight: 24,
-    fontWeight: '600',
-    textAlign: 'center',
+    letterSpacing: -0.48,
   },
   formArea: {
-    marginTop: 10,
-    gap: 18,
+    marginTop: 80,
+    gap: 20,
   },
   inputGroup: {
     gap: 8,
   },
   inputLabel: {
-    color: colors.navySoft,
-    fontSize: 15,
-    fontWeight: '700',
+    color: authColors.navy,
+    fontFamily: 'Pretendard-Medium',
+    fontSize: 14,
+    letterSpacing: -0.7,
   },
   input: {
-    height: 50,
-    color: colors.navy,
-    fontSize: 18,
-    fontWeight: '600',
-    borderBottomWidth: 1.2,
-    borderBottomColor: colors.lineStrong,
-    paddingHorizontal: 0,
+    height: 46,
+    borderRadius: 16,
+    backgroundColor: authColors.input,
+    color: authColors.text,
+    fontFamily: 'Pretendard-Bold',
+    fontSize: 16,
+    letterSpacing: -0.8,
+    paddingHorizontal: 16,
+    paddingVertical: 0,
   },
   codeMetaRow: {
     alignItems: 'center',
@@ -491,9 +476,9 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   timerText: {
-    color: colors.orange,
+    color: authColors.timer,
+    fontFamily: 'Pretendard-Medium',
     fontSize: 12,
-    fontWeight: '800',
   },
   resendButton: {
     paddingVertical: 4,
@@ -502,19 +487,18 @@ const styles = StyleSheet.create({
     opacity: 0.55,
   },
   resendButtonText: {
-    color: colors.navy,
+    color: authColors.navy,
+    fontFamily: 'Pretendard-Bold',
     fontSize: 12,
-    fontWeight: '900',
     textDecorationLine: 'underline',
   },
   resendButtonTextDisabled: {
-    color: colors.muted,
+    color: authColors.placeholder,
   },
   resetButton: {
-    marginTop: 12,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: colors.honey,
+    height: 52,
+    borderRadius: 14,
+    backgroundColor: authColors.yellow,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -522,20 +506,20 @@ const styles = StyleSheet.create({
     opacity: 0.58,
   },
   resetButtonText: {
-    color: colors.navy,
-    fontSize: 18,
-    fontWeight: '900',
-    letterSpacing: 0,
+    color: authColors.navy,
+    fontFamily: 'Pretendard-Bold',
+    fontSize: 16,
+    letterSpacing: -0.48,
   },
   footerArea: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingBottom: 8,
   },
   footerLink: {
-    color: colors.navy,
+    color: authColors.navy,
+    fontFamily: 'Pretendard-Bold',
     fontSize: 14,
-    fontWeight: '600',
+    letterSpacing: -0.42,
     textDecorationLine: 'underline',
   },
   buttonPressed: {

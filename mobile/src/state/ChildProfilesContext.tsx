@@ -12,6 +12,7 @@ import {
   ChildProfile,
 } from '@/src/data/classes';
 import { supabase } from '@/src/lib/supabase';
+import { getCurrentGuardianConsent } from '@/src/lib/legalConsent';
 
 type ChildProfileInput = Omit<ChildProfile, 'id'>;
 
@@ -131,6 +132,11 @@ export function ChildProfilesProvider({ children }: ChildProfilesProviderProps) 
             ...prev,
           ]);
           return;
+        }
+
+        const consent = await getCurrentGuardianConsent(user.id);
+        if (!consent) {
+          throw new Error('아이 등록 전에 보호자 동의를 완료해주세요.');
         }
 
         const { data, error } = await supabase

@@ -2,7 +2,7 @@
   "expo": {
     "name": "Globee",
     "slug": "globee",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/images/globee-app-icon.png",
     "scheme": "globee",
@@ -16,7 +16,7 @@
     },
     "ios": {
       "bundleIdentifier": "com.globee.parent",
-      "buildNumber": "6",
+      "buildNumber": "7",
       "supportsTablet": false,
       "config": {
         "usesNonExemptEncryption": false
@@ -24,11 +24,11 @@
     },
     "android": {
       "package": "com.globee.parent",
-      "versionCode": 4,
+      "versionCode": 5,
       "permissions": [],
       "adaptiveIcon": {
         "backgroundColor": "#FFF498",
-        "foregroundImage": "./assets/images/globee-app-icon.png"
+        "foregroundImage": "./assets/images/globee-logo.png"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
@@ -50,12 +50,12 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/globee-app-icon.png",
-          "imageWidth": 280,
+          "image": "./assets/images/globee-logo.png",
+          "imageWidth": 330,
           "resizeMode": "contain",
-          "backgroundColor": "#FFF498",
+          "backgroundColor": "#FFFDF7",
           "dark": {
-            "backgroundColor": "#000000"
+            "backgroundColor": "#FFFDF7"
           }
         }
       ],

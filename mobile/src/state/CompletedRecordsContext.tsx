@@ -83,6 +83,7 @@ type CompletedClassRow = {
 };
 
 const completionPhotoBucket = 'completed-class-photos';
+const completionPhotoSignedUrlLifetimeSeconds = 10 * 60;
 
 type CompletedRecordsContextValue = {
   completedRecords: CompletedClassRecord[];
@@ -163,7 +164,7 @@ async function createPhotoSignedUrls(
     .from(completionPhotoBucket)
     .createSignedUrls(
       sortedPhotos.map((photo) => photo.storage_path),
-      60 * 60,
+      completionPhotoSignedUrlLifetimeSeconds,
     );
 
   if (error || !data) return [];

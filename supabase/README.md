@@ -18,6 +18,7 @@ functions/  Supabase Edge Functions
 - `completed_classes`: 완료문화 기록과 선생님 코멘트
 - `completed_class_photos`: 완료문화 사진 메타데이터
 - `application_notifications`: 운영진 알림 발송 기록과 중복 발송 방지
+- `guardian_consent_records`: 보호자 본인 확인과 필수·선택 동의 이력을 저장하는 추가 전용 기록
 - `stamp_countries`: 스탬프 국가 목록
 
 ## Important Functions
@@ -30,6 +31,7 @@ functions/  Supabase Edge Functions
 - `is_phone_registered(p_phone)`: 회원가입 중 전화번호 중복 확인
 - `get_active_application_count(p_class_id)`: 자리 수 계산용 신청 수 조회
 - `has_pending_review_applications_for_class(p_class_id, p_excluded_application_id)`: 완료문화/미참여 처리 전 확인중 신청 존재 여부 확인
+- `record_guardian_consent_v2(...)`: 인증된 보호자 전화번호를 확인하고 현재 법률 문서 동의를 서버 시각으로 기록
 
 ## Application Status Flow
 
@@ -82,7 +84,11 @@ active 신청이 남은 문화교류를 다시 열고, 이후에는 active 신�
 - Edge Function은 `verify_jwt = false`로 배포하지만 함수 내부에서 `Authorization` 헤더와 `auth.getUser()`로 세션을 직접 검증한 뒤 service role client를 사용합니다.
 - 카카오워크 Webhook URL은 Supabase Secret에만 저장하고 코드에 직접 넣지 않습니다.
 - 새 SQL을 추가하면 Supabase SQL Editor에서 실행한 뒤 앱/관리자웹 주요 흐름을 다시 테스트합니다.
+- `20260805132917_harden_applications_and_add_guardian_consents.sql`은 과거의 넓은 신청 UPDATE 정책 제거, 공개 신청 수 집계 수정, 보호자 동의 기록과 사진 선택 동의 정책을 함께 적용합니다.
+- `20260805143323_remove_guardian_name_input_and_enforce_class_photo_consent.sql`은 보호자 이름 수집을 제거하고, 실제 참석자 전원이 사진에 동의한 문화교류만 관리자·메타데이터·Storage 단계에서 사진 업로드를 허용합니다.
+- `20260806025115_stop_collecting_guardian_relationship.sql`은 보호자 관계 신규 수집을 제거하고, 기존 앱용 동의 함수는 호환 래퍼로 유지합니다.
 - 새 테이블, 시퀀스, RPC를 추가할 때는 같은 SQL 파일에 역할별 최소 `GRANT`와 RLS 정책을 함께 작성합니다.
 - `is_phone_registered` RPC는 기존 설치 앱 호환성을 위해 임시 유지합니다. 해당 RPC 호출을 제거한 모바일 업데이트가 운영 사용자에게 배포된 뒤 실행 권한을 제거합니다.
 - Supabase Pro 이상에서는 Auth 설정의 Leaked Password Protection을 활성화합니다.
 - Storage 사진 파일은 private bucket에 저장하고, RLS로 해당 보호자와 운영진만 접근하게 합니다.
+- 활동 사진은 같은 문화교류의 실제 참석자 전원이 현재 문서 버전의 사진 선택 동의에 동의했을 때만 운영진이 추가할 수 있습니다.

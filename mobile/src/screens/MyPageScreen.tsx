@@ -18,10 +18,12 @@ import { router, useLocalSearchParams } from 'expo-router';
 
 import ScreenShell from '@/src/components/ScreenShell';
 import { ChildProfile } from '@/src/data/classes';
+import { PRIVACY_POLICY_URL, TERMS_URL } from '@/src/lib/legalConsent';
 import { supabase, supabaseAnonKey, supabaseUrl } from '@/src/lib/supabase';
 import { useApplications } from '@/src/state/ApplicationsContext';
 import { useChildProfiles } from '@/src/state/ChildProfilesContext';
 import { useCompletedRecords } from '@/src/state/CompletedRecordsContext';
+import { authColors } from '@/src/theme/auth';
 import { colors } from '@/src/theme/colors';
 
 type FormState = {
@@ -49,9 +51,6 @@ const activeApplicationStatuses = new Set([
   '신청 완료',
   '확정 대기',
 ]);
-
-const PRIVACY_POLICY_URL = 'https://globee.ai.kr/privacy.html';
-const TERMS_URL = 'https://globee.ai.kr/terms.html';
 
 function normalizeChildName(value: string) {
   return value.replace(/\s/g, '').toLowerCase();
@@ -419,7 +418,7 @@ export default function MyPageScreen() {
       <View style={[styles.avatar, isBoy ? styles.avatarBoy : styles.avatarGirl]}>
         <MaterialCommunityIcons
           name={isBoy ? 'baby-face-outline' : 'face-woman-outline'}
-          size={34}
+          size={28}
           color={colors.navy}
         />
       </View>
@@ -479,18 +478,18 @@ export default function MyPageScreen() {
       </Pressable>
 
       <View style={styles.accountSection}>
-        <View style={styles.accountLine} />
         <Text style={styles.accountTitle}>계정 관리</Text>
 
         <View style={styles.accountActions}>
           <Pressable
             style={({ pressed }) => [
               styles.accountActionButton,
+              styles.logoutButton,
               pressed && styles.pressed,
             ]}
             onPress={handleLogout}
           >
-            <Text style={styles.logoutText}>로그아웃하기</Text>
+            <Text style={styles.logoutText}>로그아웃</Text>
           </Pressable>
 
           <Pressable
@@ -509,6 +508,14 @@ export default function MyPageScreen() {
         </View>
 
         <View style={styles.legalLinks}>
+          <Pressable
+            onPress={() =>
+              router.push({ pathname: '/consent', params: { mode: 'settings' } })
+            }
+          >
+            <Text style={styles.legalLinkText}>동의 설정</Text>
+          </Pressable>
+          <Text style={styles.legalLinkDivider}>·</Text>
           <Pressable onPress={() => void openLegalPage(PRIVACY_POLICY_URL)}>
             <Text style={styles.legalLinkText}>개인정보처리방침</Text>
           </Pressable>
@@ -560,7 +567,7 @@ export default function MyPageScreen() {
                     value={form.fullName}
                     onChangeText={(value) => updateForm('fullName', value)}
                     placeholder="예: 김민준"
-                    placeholderTextColor="#9BA6BF"
+                    placeholderTextColor={colors.muted}
                     style={getInputStyle('fullName')}
                     returnKeyType="next"
                   />
@@ -576,7 +583,7 @@ export default function MyPageScreen() {
                         updateForm('age', value.replace(/[^0-9]/g, ''))
                       }
                       placeholder="예: 8"
-                      placeholderTextColor="#9BA6BF"
+                      placeholderTextColor={colors.muted}
                       keyboardType={Platform.OS === 'ios' ? 'phone-pad' : 'number-pad'}
                       style={getInputStyle('age')}
                     />
@@ -639,7 +646,7 @@ export default function MyPageScreen() {
                     value={form.school}
                     onChangeText={(value) => updateForm('school', value)}
                     placeholder="예: 공릉초 3학년"
-                    placeholderTextColor="#9BA6BF"
+                    placeholderTextColor={colors.muted}
                     style={getInputStyle('school')}
                     returnKeyType="next"
                   />
@@ -652,7 +659,7 @@ export default function MyPageScreen() {
                     value={form.interestsText}
                     onChangeText={(value) => updateForm('interestsText', value)}
                     placeholder="예: 음식, 퀴즈, 만들기"
-                    placeholderTextColor="#9BA6BF"
+                    placeholderTextColor={colors.muted}
                     style={getInputStyle('interestsText')}
                     returnKeyType="next"
                   />
@@ -668,7 +675,7 @@ export default function MyPageScreen() {
                     value={form.note}
                     onChangeText={(value) => updateForm('note', value)}
                     placeholder="예: 활동적인 문화교류와 그림 그리기를 좋아해요. 영어를 잘 못해도 말을 많이 걸어요. 낯을 많이 가려요"
-                    placeholderTextColor="#9BA6BF"
+                    placeholderTextColor={colors.muted}
                     multiline
                     style={[getInputStyle('note'), styles.textarea]}
                     textAlignVertical="top"
@@ -721,32 +728,32 @@ const styles = StyleSheet.create({
   title: {
     color: colors.navy,
     fontSize: 30,
-    fontWeight: '900',
+    fontFamily: 'Pretendard-Bold',
     letterSpacing: 0,
   },
   childList: {
-    gap: 14,
-    marginBottom: 18,
+    width: '100%',
+    gap: 12,
+    marginBottom: 12,
   },
   childCard: {
+    width: '100%',
     flexDirection: 'row',
-    gap: 14,
+    alignItems: 'flex-start',
+    gap: 12,
     padding: 16,
-    borderRadius: 30,
-    backgroundColor: colors.cardSolid,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.88)',
+    borderRadius: 20,
+    backgroundColor: authColors.white,
   },
   avatar: {
-    width: 58,
-    height: 58,
-    borderRadius: 20,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 2,
   },
   avatarBoy: {
-    backgroundColor: '#F2DD57',
+    backgroundColor: authColors.yellow,
   },
   avatarGirl: {
     backgroundColor: '#F6C9DD',
@@ -756,106 +763,110 @@ const styles = StyleSheet.create({
   },
   childTopRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 4,
+    alignItems: 'baseline',
+    gap: 4,
+    marginBottom: 8,
     flexWrap: 'wrap',
   },
   childName: {
-    color: colors.navy,
-    fontSize: 21,
-    fontWeight: '900',
+    color: authColors.text,
+    fontFamily: 'Pretendard-Bold',
+    fontSize: 18,
+    letterSpacing: -0.54,
   },
   childAge: {
-    color: colors.orange,
+    color: '#FF9F43',
+    fontFamily: 'Pretendard-Medium',
     fontSize: 14,
-    fontWeight: '900',
+    letterSpacing: -0.42,
   },
   school: {
-    color: colors.muted,
-    fontSize: 13,
-    fontWeight: '700',
-    marginBottom: 10,
+    color: authColors.textMuted,
+    fontFamily: 'Pretendard-Medium',
+    fontSize: 14,
+    letterSpacing: -0.42,
+    marginBottom: 16,
   },
   interestRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 7,
-    marginBottom: 10,
+    gap: 4,
   },
   interestChip: {
-    paddingHorizontal: 11,
-    paddingVertical: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
     borderRadius: 999,
-    backgroundColor: colors.background,
+    backgroundColor: '#F5F5F5',
   },
   interestText: {
-    color: colors.navy,
-    fontSize: 11,
-    fontWeight: '900',
+    color: colors.muted,
+    fontFamily: 'Pretendard-Bold',
+    fontSize: 12,
+    letterSpacing: -0.36,
   },
   note: {
     color: colors.text,
     fontSize: 13,
     lineHeight: 20,
-    fontWeight: '700',
+    fontFamily: 'Pretendard-Medium',
     opacity: 0.78,
+    marginTop: 8,
   },
   addButton: {
-    height: 58,
-    borderRadius: 22,
+    width: '100%',
+    height: 52,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.navy,
-    marginBottom: 10,
+    marginBottom: 20,
   },
   addButtonText: {
-    color: colors.white,
-    fontSize: 16,
-    fontWeight: '900',
+    color: authColors.white,
+    fontFamily: 'Pretendard-Bold',
+    fontSize: 15,
+    letterSpacing: -0.45,
   },
   accountSection: {
-    marginTop: 10,
+    marginTop: 0,
     marginBottom: 8,
   },
-  accountLine: {
-    width: '100%',
-    height: 1,
-    backgroundColor: 'rgba(20, 33, 61, 0.1)',
+  accountTitle: {
+    color: colors.muted,
+    fontFamily: 'Pretendard-Medium',
+    fontSize: 13,
+    letterSpacing: -0.39,
     marginBottom: 16,
   },
-  accountTitle: {
-    color: colors.navySoft,
-    fontSize: 13,
-    fontWeight: '900',
-    marginBottom: 10,
-  },
   accountActions: {
-    flexDirection: 'row',
+    width: '100%',
     gap: 10,
   },
   accountActionButton: {
-    flex: 1,
-    minHeight: 46,
-    borderRadius: 18,
+    width: '100%',
+    height: 44,
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(255,255,255,0.58)',
+  },
+  logoutButton: {
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.86)',
+    borderColor: '#EDE3C7',
   },
   accountActionDisabled: {
     opacity: 0.55,
   },
   logoutText: {
-    color: colors.navySoft,
+    color: colors.navy,
+    fontFamily: 'Pretendard-Bold',
     fontSize: 14,
-    fontWeight: '900',
+    letterSpacing: -0.42,
   },
   deleteAccountText: {
-    color: '#A05252',
+    color: '#D93636',
+    fontFamily: 'Pretendard-Medium',
     fontSize: 14,
-    fontWeight: '900',
+    letterSpacing: -0.42,
   },
   legalLinks: {
     flexDirection: 'row',
@@ -867,7 +878,7 @@ const styles = StyleSheet.create({
   legalLinkText: {
     color: colors.navySoft,
     fontSize: 12,
-    fontWeight: '700',
+    fontFamily: 'Pretendard-Medium',
     textDecorationLine: 'underline',
   },
   legalLinkDivider: {
@@ -884,7 +895,7 @@ const styles = StyleSheet.create({
   },
   modalBackdrop: {
     flex: 1,
-    backgroundColor: 'rgba(17, 28, 61, 0.28)',
+    backgroundColor: 'rgba(15, 46, 75, 0.28)',
     justifyContent: 'center',
     paddingHorizontal: 18,
   },
@@ -908,13 +919,13 @@ const styles = StyleSheet.create({
   modalLabel: {
     color: colors.orange,
     fontSize: 12,
-    fontWeight: '900',
+    fontFamily: 'Pretendard-Bold',
     marginBottom: 4,
   },
   modalTitle: {
     color: colors.navy,
     fontSize: 22,
-    fontWeight: '900',
+    fontFamily: 'Pretendard-Bold',
     lineHeight: 28,
   },
   closeButton: {
@@ -934,7 +945,7 @@ const styles = StyleSheet.create({
   inputLabel: {
     color: colors.navy,
     fontSize: 13,
-    fontWeight: '800',
+    fontFamily: 'Pretendard-Bold',
     marginBottom: 8,
   },
   input: {
@@ -947,7 +958,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     color: colors.navy,
     fontSize: 14,
-    fontWeight: '700',
+    fontFamily: 'Pretendard-Medium',
   },
   inputError: {
     borderColor: '#E64A4A',
@@ -956,7 +967,7 @@ const styles = StyleSheet.create({
   errorText: {
     color: '#D93636',
     fontSize: 12,
-    fontWeight: '800',
+    fontFamily: 'Pretendard-Bold',
     marginTop: 6,
   },
   textarea: {
@@ -966,7 +977,7 @@ const styles = StyleSheet.create({
     marginTop: 6,
     color: colors.muted,
     fontSize: 12,
-    fontWeight: '700',
+    fontFamily: 'Pretendard-Medium',
     lineHeight: 18,
   },
   row: {
@@ -999,7 +1010,7 @@ const styles = StyleSheet.create({
   genderText: {
     color: colors.navy,
     fontSize: 13,
-    fontWeight: '800',
+    fontFamily: 'Pretendard-Bold',
     opacity: 0.7,
   },
   genderTextActive: {
@@ -1011,7 +1022,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     paddingTop: 10,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(20, 33, 61, 0.08)',
+    borderTopColor: 'rgba(15, 46, 75, 0.08)',
   },
   deleteButton: {
     flex: 0.9,
@@ -1024,7 +1035,7 @@ const styles = StyleSheet.create({
   deleteButtonText: {
     color: '#A05252',
     fontSize: 15,
-    fontWeight: '900',
+    fontFamily: 'Pretendard-Bold',
   },
   saveButton: {
     flex: 1.4,
@@ -1040,6 +1051,6 @@ const styles = StyleSheet.create({
   saveButtonText: {
     color: colors.white,
     fontSize: 15,
-    fontWeight: '900',
+    fontFamily: 'Pretendard-Bold',
   },
 });

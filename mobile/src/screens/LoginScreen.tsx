@@ -12,6 +12,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { Href, router } from 'expo-router';
 
 import BrandWordmark from '@/src/components/BrandWordmark';
@@ -24,7 +25,7 @@ import {
 import { goBackOrStart } from '@/src/lib/navigation';
 import { supabase } from '@/src/lib/supabase';
 import { useAuthScreenBackHandler } from '@/src/lib/useAuthScreenBackHandler';
-import { colors } from '@/src/theme/colors';
+import { authColors } from '@/src/theme/auth';
 
 const resetPasswordRoute = '/reset-password' as Href;
 
@@ -38,8 +39,8 @@ export default function LoginScreen() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isWideAndroid = Platform.OS === 'android' && width >= 520;
   const bottomPadding = Math.max(
-    insets.bottom + 28,
-    isWideAndroid ? 92 : 42,
+    insets.bottom + 20,
+    isWideAndroid ? 84 : 20,
   );
 
   const handleLogin = async () => {
@@ -73,7 +74,7 @@ export default function LoginScreen() {
     }
 
     setIsSubmitting(false);
-    router.replace('/(tabs)/home');
+    router.replace('/consent');
   };
 
   const handleLoginHelp = () => {
@@ -86,13 +87,6 @@ export default function LoginScreen() {
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <View style={styles.bgCircleTop} />
-        <View style={styles.bgCircleBottom} />
-
-        <Pressable onPress={goBackOrStart} style={styles.backButton} hitSlop={10}>
-          <Text style={styles.backText}>←</Text>
-        </Pressable>
-
         <ScrollView
           alwaysBounceVertical={false}
           bounces={false}
@@ -101,59 +95,72 @@ export default function LoginScreen() {
           overScrollMode="never"
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.headerArea}>
-            <BrandWordmark width={148} style={styles.brandLogo} />
-            <Text style={styles.title}>로그인</Text>
-            <Text style={styles.subtitle}>
-              보호자 전화번호와 비밀번호로 시작해요.
-            </Text>
-          </View>
-
-          <View style={styles.formArea}>
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>휴대폰 번호</Text>
-              <TextInput
-                value={phone}
-                onChangeText={(value) => setPhone(formatKoreanPhoneInput(value))}
-                placeholder="휴대폰 번호를 입력해주세요"
-                placeholderTextColor={colors.muted}
-                keyboardType="phone-pad"
-                style={styles.input}
-                textContentType="telephoneNumber"
-                autoComplete="tel"
-              />
-            </View>
-
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>비밀번호</Text>
-              <TextInput
-                value={password}
-                onChangeText={setPassword}
-                placeholder="비밀번호를 입력해주세요"
-                placeholderTextColor={colors.muted}
-                secureTextEntry
-                style={styles.input}
-                maxLength={20}
-                textContentType="password"
-                autoComplete="password"
-                autoCapitalize="none"
-                autoCorrect={false}
-              />
-            </View>
-
+          <View style={styles.mainArea}>
             <Pressable
-              disabled={isSubmitting}
+              onPress={goBackOrStart}
               style={({ pressed }) => [
-                styles.loginButton,
-                isSubmitting && styles.loginButtonDisabled,
+                styles.backButton,
                 pressed && styles.buttonPressed,
               ]}
-              onPress={handleLogin}
+              hitSlop={10}
             >
-              <Text style={styles.loginButtonText}>
-                {isSubmitting ? '로그인 중' : '로그인'}
-              </Text>
+              <Ionicons name="arrow-back" size={28} color={authColors.navy} />
             </Pressable>
+
+            <View style={styles.headerArea}>
+              <BrandWordmark width={157} style={styles.brandLogo} />
+              <Text style={styles.title}>로그인</Text>
+              <Text style={styles.subtitle}>
+                보호자 전화번호와 비밀번호로 시작해요
+              </Text>
+            </View>
+
+            <View style={styles.formArea}>
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>휴대폰 번호</Text>
+                <TextInput
+                  value={phone}
+                  onChangeText={(value) => setPhone(formatKoreanPhoneInput(value))}
+                  placeholder="휴대폰 번호를 입력해주세요"
+                  placeholderTextColor={authColors.placeholder}
+                  keyboardType="phone-pad"
+                  style={styles.input}
+                  textContentType="telephoneNumber"
+                  autoComplete="tel"
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>비밀번호</Text>
+                <TextInput
+                  value={password}
+                  onChangeText={setPassword}
+                  placeholder="비밀번호를 입력해주세요"
+                  placeholderTextColor={authColors.placeholder}
+                  secureTextEntry
+                  style={styles.input}
+                  maxLength={20}
+                  textContentType="password"
+                  autoComplete="password"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                />
+              </View>
+
+              <Pressable
+                disabled={isSubmitting}
+                style={({ pressed }) => [
+                  styles.loginButton,
+                  isSubmitting && styles.loginButtonDisabled,
+                  pressed && styles.buttonPressed,
+                ]}
+                onPress={handleLogin}
+              >
+                <Text style={styles.loginButtonText}>
+                  {isSubmitting ? '로그인 중' : '로그인'}
+                </Text>
+              </Pressable>
+            </View>
           </View>
 
           <View style={styles.footerArea}>
@@ -161,13 +168,13 @@ export default function LoginScreen() {
               <Text style={styles.footerLink}>회원가입</Text>
             </Pressable>
 
-            <Text style={styles.footerDivider}>|</Text>
+            <View style={styles.footerDivider} />
 
             <Pressable onPress={() => router.replace(resetPasswordRoute)} hitSlop={10}>
               <Text style={styles.footerLink}>비밀번호 찾기</Text>
             </Pressable>
 
-            <Text style={styles.footerDivider}>|</Text>
+            <View style={styles.footerDivider} />
 
             <Pressable onPress={handleLoginHelp} hitSlop={10}>
               <Text style={styles.footerLink}>로그인 문의</Text>
@@ -182,109 +189,81 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: authColors.background,
   },
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: authColors.background,
     overflow: 'hidden',
   },
-
-  bgCircleTop: {
-    position: 'absolute',
-    top: -60,
-    right: -50,
-    width: 220,
-    height: 220,
-    borderRadius: 999,
-    backgroundColor: '#DDEDFC',
-    opacity: 0.95,
-  },
-  bgCircleBottom: {
-    position: 'absolute',
-    bottom: -150,
-    left: -90,
-    width: 250,
-    height: 250,
-    borderRadius: 999,
-    backgroundColor: '#F7EBA6',
-    opacity: 0.95,
-  },
-
   backButton: {
-    position: 'absolute',
-    top: 54,
-    left: 22,
-    width: 44,
-    height: 44,
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    borderWidth: 1,
+    borderColor: authColors.navy,
     alignItems: 'center',
     justifyContent: 'center',
-    zIndex: 3,
+    marginBottom: 40,
   },
-  backText: {
-    color: colors.navy,
-    fontSize: 35,
-    fontWeight: '700',
-  },
-
   content: {
     flexGrow: 1,
-    paddingHorizontal: 30,
-    paddingTop: 78,
-    paddingBottom: 34,
+    paddingHorizontal: 20,
+    paddingTop: 20,
     justifyContent: 'space-between',
   },
-
+  mainArea: {
+    width: '100%',
+  },
   headerArea: {
-    alignItems: 'center',
-    marginTop: 4,
+    alignItems: 'flex-start',
   },
   brandLogo: {
-    marginBottom: 16,
+    marginBottom: 20,
   },
   title: {
-    color: colors.navy,
-    fontSize: 26,
+    color: authColors.text,
+    fontFamily: 'Pretendard-Bold',
+    fontSize: 20,
     lineHeight: 30,
-    fontWeight: '900',
-    letterSpacing: 0,
-    textAlign: 'center',
-    marginBottom: 10,
+    letterSpacing: -0.6,
+    marginBottom: 8,
   },
   subtitle: {
-    color: colors.muted,
-    fontSize: 15,
+    color: authColors.textMuted,
+    fontFamily: 'Pretendard-Medium',
+    fontSize: 16,
     lineHeight: 24,
-    fontWeight: '600',
-    textAlign: 'center',
+    letterSpacing: -0.48,
   },
   formArea: {
-    marginTop: 24,
-    gap: 28,
+    marginTop: 80,
+    gap: 20,
   },
   inputGroup: {
-    gap: 10,
+    gap: 8,
   },
   inputLabel: {
-    color: colors.navySoft,
-    fontSize: 15,
-    fontWeight: '700',
+    color: authColors.navy,
+    fontFamily: 'Pretendard-Medium',
+    fontSize: 14,
+    letterSpacing: -0.7,
   },
   input: {
-    height: 54,
-    color: colors.navy,
-    fontSize: 18,
-    fontWeight: '600',
-    borderBottomWidth: 1.2,
-    borderBottomColor: colors.lineStrong,
-    paddingHorizontal: 0,
+    height: 46,
+    borderRadius: 16,
+    backgroundColor: authColors.input,
+    color: authColors.text,
+    fontFamily: 'Pretendard-Bold',
+    fontSize: 16,
+    letterSpacing: -0.8,
+    paddingHorizontal: 16,
+    paddingVertical: 0,
   },
-
   loginButton: {
-    marginTop: 18,
-    height: 62,
-    borderRadius: 30,
-    backgroundColor: colors.honey,
+    height: 52,
+    borderRadius: 14,
+    backgroundColor: authColors.yellow,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -292,31 +271,29 @@ const styles = StyleSheet.create({
     opacity: 0.58,
   },
   loginButtonText: {
-    color: colors.navy,
-    fontSize: 18,
-    fontWeight: '900',
-    letterSpacing: 0,
+    color: authColors.navy,
+    fontFamily: 'Pretendard-Bold',
+    fontSize: 16,
+    letterSpacing: -0.48,
   },
-
   footerArea: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     flexWrap: 'wrap',
-    gap: 10,
-    paddingBottom: 8,
+    gap: 8,
   },
   footerLink: {
-    color: colors.navy,
+    color: '#505050',
+    fontFamily: 'Pretendard-Medium',
     fontSize: 14,
-    fontWeight: '600',
+    letterSpacing: -0.42,
   },
   footerDivider: {
-    color: colors.muted,
-    fontSize: 14,
-    fontWeight: '600',
+    width: 1,
+    height: 14,
+    backgroundColor: authColors.divider,
   },
-
   buttonPressed: {
     opacity: 0.9,
     transform: [{ scale: 0.985 }],

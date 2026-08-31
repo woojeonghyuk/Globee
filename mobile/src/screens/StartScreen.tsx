@@ -15,7 +15,7 @@ import * as SplashScreen from 'expo-splash-screen';
 
 import BrandWordmark from '@/src/components/BrandWordmark';
 import { supabase } from '@/src/lib/supabase';
-import { colors } from '@/src/theme/colors';
+import { authColors } from '@/src/theme/auth';
 
 const minimumSplashDurationMs = 1000;
 const homeNavigationHideDelayMs = 80;
@@ -32,8 +32,8 @@ export default function StartScreen() {
 
   const isWideAndroid = Platform.OS === 'android' && width >= 520;
   const bottomPadding = Math.max(
-    insets.bottom + 28,
-    isWideAndroid ? 92 : 42,
+    insets.bottom + 20,
+    isWideAndroid ? 84 : 20,
   );
 
   useEffect(() => {
@@ -82,7 +82,7 @@ export default function StartScreen() {
           if (!isMounted) return;
 
           if (data.session) {
-            router.replace('/(tabs)/home');
+            router.replace('/consent');
 
             setTimeout(() => {
               void SplashScreen.hideAsync().catch(() => undefined);
@@ -112,9 +112,6 @@ export default function StartScreen() {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
       <View style={styles.container}>
-        <View style={styles.bgCircleTop} />
-        <View style={styles.bgCircleBottom} />
-
         <Animated.View
           style={[
             styles.content,
@@ -125,8 +122,8 @@ export default function StartScreen() {
             },
           ]}
         >
-          <View style={styles.topBlock}>
-            <BrandWordmark width={150} style={styles.brandLogo} />
+          <View>
+            <BrandWordmark width={170} style={styles.brandLogo} />
 
             <Text style={styles.title}>
               가까운 유학생 선생님과{'\n'}
@@ -135,7 +132,7 @@ export default function StartScreen() {
 
             <Text style={styles.subtitle}>
               검증된 문화교류를 쉽고 편하게 찾아보고{'\n'}
-              우리 아이에게 맞는 클래스를 신청해보세요.
+              우리 아이에게 맞는 클래스를 신청해보세요
             </Text>
           </View>
 
@@ -172,9 +169,12 @@ export default function StartScreen() {
             <Pressable
               onPress={() => router.push('/login')}
               hitSlop={10}
-              style={({ pressed }) => pressed && styles.linkPressed}
+              style={({ pressed }) => [
+                styles.loginButton,
+                pressed && styles.linkPressed,
+              ]}
             >
-              <Text style={styles.linkText}>이미 계정이 있다면 로그인</Text>
+              <Text style={styles.linkText}>이미 계정이 있어요</Text>
             </Pressable>
           </View>
         </Animated.View>
@@ -186,101 +186,79 @@ export default function StartScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: authColors.background,
   },
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: authColors.background,
     overflow: 'hidden',
   },
-
-  bgCircleTop: {
-    position: 'absolute',
-    top: -60,
-    right: -50,
-    width: 220,
-    height: 220,
-    borderRadius: 999,
-    backgroundColor: '#DDEDFC',
-    opacity: 0.95,
-  },
-  bgCircleBottom: {
-    position: 'absolute',
-    bottom: -150,
-    left: -90,
-    width: 250,
-    height: 250,
-    borderRadius: 999,
-    backgroundColor: '#F7EBA6',
-    opacity: 0.95,
-  },
-
   content: {
     flex: 1,
-    paddingHorizontal: 30,
-    paddingTop: 40,
-    paddingBottom: 28,
+    paddingHorizontal: 20,
+    paddingTop: 80,
     justifyContent: 'space-between',
   },
-
-  topBlock: {
-    paddingTop: 6,
-  },
   brandLogo: {
-    marginBottom: 34,
+    marginBottom: 16,
   },
   title: {
-    color: colors.navy,
-    fontSize: 31,
-    lineHeight: 40,
-    fontWeight: '900',
-    letterSpacing: 0,
-    marginBottom: 22,
+    color: authColors.text,
+    fontFamily: 'Pretendard-Bold',
+    fontSize: 22,
+    lineHeight: 30,
+    letterSpacing: -0.6,
+    marginBottom: 16,
   },
   subtitle: {
-    color: colors.muted,
-    fontSize: 15,
-    lineHeight: 26,
-    fontWeight: '700',
+    color: authColors.textMuted,
+    fontFamily: 'Pretendard-Medium',
+    fontSize: 18,
+    lineHeight: 24,
+    letterSpacing: -0.48,
   },
-
   bottomBlock: {
-    paddingBottom: 6,
+    gap: 10,
   },
   primaryButton: {
-    height: 62,
-    borderRadius: 24,
-    backgroundColor: colors.navy,
+    height: 52,
+    borderRadius: 14,
+    backgroundColor: authColors.yellow,
     alignItems: 'center',
     justifyContent: 'center',
   },
   primaryButtonText: {
-    color: colors.white,
-    fontSize: 18,
-    fontWeight: '900',
-    letterSpacing: 0,
+    color: authColors.navy,
+    fontFamily: 'Pretendard-Bold',
+    fontSize: 16,
+    letterSpacing: -0.48,
   },
   browseButton: {
-    height: 54,
-    marginTop: 12,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.7)',
+    height: 52,
+    borderRadius: 14,
+    backgroundColor: authColors.white,
     borderWidth: 1,
-    borderColor: colors.navy,
+    borderColor: authColors.secondaryBorder,
     alignItems: 'center',
     justifyContent: 'center',
   },
   browseButtonText: {
-    color: colors.navy,
-    fontSize: 16,
-    fontWeight: '900',
+    color: authColors.navy,
+    fontFamily: 'Pretendard-Bold',
+    fontSize: 14,
+    letterSpacing: -0.42,
+  },
+  loginButton: {
+    height: 42,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   linkText: {
-    marginTop: 18,
     textAlign: 'center',
-    color: colors.navy,
-    fontSize: 15,
-    fontWeight: '700',
+    color: authColors.navy,
+    fontFamily: 'Pretendard-Bold',
+    fontSize: 14,
+    letterSpacing: -0.42,
     textDecorationLine: 'underline',
   },
 

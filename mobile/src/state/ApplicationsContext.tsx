@@ -12,6 +12,7 @@ import {
   ApplicationItem,
 } from '@/src/data/classes';
 import { supabase } from '@/src/lib/supabase';
+import { getCurrentGuardianConsent } from '@/src/lib/legalConsent';
 
 type ApplicationInput = Omit<ApplicationItem, 'id'>;
 
@@ -199,6 +200,11 @@ export function ApplicationsProvider({ children }: ApplicationsProviderProps) {
         } = await supabase.auth.getUser();
 
         if (user) {
+          const consent = await getCurrentGuardianConsent(user.id);
+          if (!consent) {
+            throw new Error('문화교류 신청 전에 보호자 동의를 완료해주세요.');
+          }
+
           const { data, error } = await supabase.rpc('apply_to_class', {
             p_child_id: application.childId,
             p_class_id: application.classId,

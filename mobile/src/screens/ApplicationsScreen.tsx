@@ -276,12 +276,12 @@ export default function ApplicationsScreen() {
 
 const styles = StyleSheet.create({
   header: {
-    marginBottom: 24,
+    marginBottom: 22,
   },
   title: {
     color: colors.navy,
-    fontSize: 32,
-    fontWeight: '900',
+    fontSize: 30,
+    fontFamily: 'Pretendard-Bold',
     letterSpacing: 0,
   },
   list: {
@@ -296,7 +296,7 @@ const styles = StyleSheet.create({
   appliedChildTitle: {
     color: colors.navy,
     fontSize: 15,
-    fontWeight: '900',
+    fontFamily: 'Pretendard-Bold',
     marginBottom: 10,
   },
   appliedChildBox: {
@@ -311,7 +311,7 @@ const styles = StyleSheet.create({
   appliedChildName: {
     color: colors.navy,
     fontSize: 13,
-    fontWeight: '900',
+    fontFamily: 'Pretendard-Bold',
   },
   cancelButton: {
     height: 58,
@@ -323,7 +323,7 @@ const styles = StyleSheet.create({
   cancelButtonText: {
     color: colors.white,
     fontSize: 16,
-    fontWeight: '900',
+    fontFamily: 'Pretendard-Bold',
   },
   buttonPressed: {
     opacity: 0.88,
@@ -331,7 +331,7 @@ const styles = StyleSheet.create({
   },
   emptyCard: {
     padding: 24,
-    borderRadius: 28,
+    borderRadius: 20,
     backgroundColor: colors.white,
     alignItems: 'center',
     marginTop: 20,
@@ -339,13 +339,13 @@ const styles = StyleSheet.create({
   emptyTitle: {
     color: colors.navy,
     fontSize: 19,
-    fontWeight: '900',
+    fontFamily: 'Pretendard-Bold',
     marginBottom: 8,
   },
   emptyText: {
     color: colors.muted,
     fontSize: 14,
-    fontWeight: '700',
+    fontFamily: 'Pretendard-Medium',
     textAlign: 'center',
   },
 });

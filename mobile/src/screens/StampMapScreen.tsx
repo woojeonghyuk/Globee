@@ -90,8 +90,7 @@ export default function StampMapScreen() {
         </ScrollView>
       ) : null}
 
-      <View style={styles.summaryCard}>
-        <Text style={styles.summaryLabel}>STAMP BOARD</Text>
+      <View style={styles.summary}>
         <Text style={styles.summaryTitle}>{collectedCount}개 나라 경험 완료</Text>
       </View>
 
@@ -105,7 +104,9 @@ export default function StampMapScreen() {
               style={[
                 styles.stampCard,
                 !isThirdItem && styles.stampCardGap,
-                !stamp.collected && styles.lockedStampCard,
+                stamp.collected
+                  ? styles.collectedStampCard
+                  : styles.lockedStampCard,
               ]}
             >
               <Text style={[styles.flag, !stamp.collected && styles.lockedFlag]}>
@@ -139,20 +140,20 @@ export default function StampMapScreen() {
 
 const styles = StyleSheet.create({
   header: {
-    marginBottom: 20,
+    marginBottom: 22,
   },
   title: {
     color: colors.navy,
-    fontSize: 32,
-    fontWeight: '900',
+    fontFamily: 'Pretendard-Bold',
+    fontSize: 30,
     letterSpacing: 0,
     marginBottom: 8,
   },
   subtitle: {
     color: colors.muted,
+    fontFamily: 'Pretendard-Medium',
     fontSize: 15,
     lineHeight: 23,
-    fontWeight: '700',
   },
   childSelector: {
     alignItems: 'center',
@@ -167,53 +168,31 @@ const styles = StyleSheet.create({
   childChip: {
     alignItems: 'center',
     alignSelf: 'flex-start',
-    backgroundColor: 'rgba(255,255,255,0.74)',
-    borderColor: 'rgba(255,255,255,0.88)',
-    borderRadius: 24,
-    borderWidth: 1,
-    height: 46,
+    backgroundColor: colors.white,
+    borderRadius: 20,
+    height: 44,
     justifyContent: 'center',
     minWidth: 92,
     paddingHorizontal: 18,
-    shadowColor: colors.navy,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.05,
-    shadowRadius: 12,
-    elevation: 2,
   },
   childChipSelected: {
     backgroundColor: colors.navy,
-    borderColor: colors.navy,
-    shadowOpacity: 0.13,
   },
   childChipText: {
     color: colors.navySoft,
+    fontFamily: 'Pretendard-Bold',
     fontSize: 14,
-    fontWeight: '900',
   },
   childChipTextSelected: {
     color: colors.white,
   },
-  summaryCard: {
-    backgroundColor: '#F6F8FC',
-    borderRadius: 28,
-    paddingVertical: 22,
-    paddingHorizontal: 20,
+  summary: {
     marginBottom: 16,
-    borderWidth: 1,
-    borderColor: '#E3E8F2',
-  },
-  summaryLabel: {
-    color: '#7B89A6',
-    fontSize: 11,
-    fontWeight: '800',
-    letterSpacing: 1.2,
-    marginBottom: 8,
   },
   summaryTitle: {
     color: colors.navy,
+    fontFamily: 'Pretendard-Bold',
     fontSize: 24,
-    fontWeight: '900',
     letterSpacing: 0,
   },
   stampGrid: {
@@ -226,19 +205,23 @@ const styles = StyleSheet.create({
     minHeight: 132,
     paddingVertical: 14,
     paddingHorizontal: 8,
-    borderRadius: 24,
-    backgroundColor: colors.cardSolid,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.92)',
     marginBottom: 12,
   },
   stampCardGap: {
     marginRight: '4.01%',
   },
+  collectedStampCard: {
+    backgroundColor: colors.white,
+    borderColor: '#F0E7CB',
+  },
   lockedStampCard: {
-    opacity: 0.62,
+    backgroundColor: 'rgba(255,255,255,0.38)',
+    borderColor: 'rgba(240,231,203,0.55)',
+    opacity: 0.52,
   },
   flag: {
     fontSize: 30,
@@ -249,16 +232,16 @@ const styles = StyleSheet.create({
   },
   country: {
     color: colors.navy,
+    fontFamily: 'Pretendard-Bold',
     fontSize: 14,
-    fontWeight: '900',
     marginBottom: 6,
     textAlign: 'center',
     lineHeight: 18,
   },
   stampState: {
     color: colors.muted,
+    fontFamily: 'Pretendard-Bold',
     fontSize: 11,
-    fontWeight: '800',
     textAlign: 'center',
   },
   collectedState: {

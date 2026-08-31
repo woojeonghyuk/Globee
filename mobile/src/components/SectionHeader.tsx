@@ -24,13 +24,13 @@ const styles = StyleSheet.create({
   title: {
     color: colors.navy,
     fontSize: 22,
-    fontWeight: '900',
+    fontFamily: 'Pretendard-Bold',
     letterSpacing: 0,
   },
   subtitle: {
     color: colors.muted,
     fontSize: 14,
-    fontWeight: '700',
+    fontFamily: 'Pretendard-Medium',
     lineHeight: 21,
   },
 });

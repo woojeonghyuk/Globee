@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 14,
     padding: 14,
-    borderRadius: 28,
+    borderRadius: 20,
     backgroundColor: colors.cardSolid,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.88)',
@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
   visual: {
     width: 94,
     minHeight: 112,
-    borderRadius: 23,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
   visualText: {
     color: colors.navy,
     fontSize: 13,
-    fontWeight: '900',
+    fontFamily: 'Pretendard-Bold',
     lineHeight: 17,
     textAlign: 'center',
   },
@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
     color: colors.navy,
     fontSize: 18,
     lineHeight: 23,
-    fontWeight: '900',
+    fontFamily: 'Pretendard-Bold',
     letterSpacing: 0,
     marginBottom: 10,
   },
@@ -158,7 +158,7 @@ const styles = StyleSheet.create({
     color: colors.muted,
     fontSize: 13,
     lineHeight: 20,
-    fontWeight: '700',
+    fontFamily: 'Pretendard-Medium',
   },
   scheduleRow: {
     alignItems: 'center',
@@ -171,7 +171,7 @@ const styles = StyleSheet.create({
     color: colors.navy,
     flexShrink: 1,
     fontSize: 14,
-    fontWeight: '900',
+    fontFamily: 'Pretendard-Bold',
   },
   seatsBadge: {
     alignSelf: 'flex-start',
@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
   seatsBadgeText: {
     color: '#9A6B00',
     fontSize: 11,
-    fontWeight: '900',
+    fontFamily: 'Pretendard-Bold',
   },
   fullSeatsBadgeText: {
     color: colors.muted,
@@ -211,7 +211,7 @@ const styles = StyleSheet.create({
   },
   statusBadgeText: {
     fontSize: 11,
-    fontWeight: '900',
+    fontFamily: 'Pretendard-Bold',
   },
   pendingStatusBadgeText: {
     color: '#9A6B00',

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Alert,
   KeyboardAvoidingView,
@@ -12,11 +12,14 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
 
 import BrandWordmark from '@/src/components/BrandWordmark';
+import LegalConsentForm from '@/src/components/LegalConsentForm';
 import { markChildRegistrationGuidePending } from '@/src/lib/childRegistrationGuide';
 import {
+  getOtpSendErrorMessage,
   getOtpVerificationErrorMessage,
   getPasswordUpdateErrorMessage,
 } from '@/src/lib/authMessages';
@@ -27,9 +30,15 @@ import {
   normalizeKoreanPhone,
 } from '@/src/lib/phone';
 import { goBackOrStart } from '@/src/lib/navigation';
+import {
+  getCurrentGuardianConsent,
+  hasAcceptedRequiredLegalConsents,
+  initialLegalConsentValues,
+  recordGuardianConsent,
+} from '@/src/lib/legalConsent';
 import { supabase } from '@/src/lib/supabase';
 import { useAuthScreenBackHandler } from '@/src/lib/useAuthScreenBackHandler';
-import { colors } from '@/src/theme/colors';
+import { authColors } from '@/src/theme/auth';
 
 type SignUpStep = 'phone' | 'code' | 'password';
 
@@ -43,18 +52,6 @@ function formatOtpTime(seconds: number) {
   return `${minutes}:${remainingSeconds}`;
 }
 
-function createTemporaryPassword() {
-  const alphabet =
-    'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
-  let value = '';
-
-  for (let index = 0; index < 20; index += 1) {
-    value += alphabet[Math.floor(Math.random() * alphabet.length)];
-  }
-
-  return `G${value}1`;
-}
-
 export default function SignUpScreen() {
   useAuthScreenBackHandler();
 
@@ -66,13 +63,15 @@ export default function SignUpScreen() {
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [pendingPhone, setPendingPhone] = useState('');
+  const [legalConsent, setLegalConsent] = useState(initialLegalConsentValues);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [otpRemainingSeconds, setOtpRemainingSeconds] = useState(0);
   const [resendRemainingSeconds, setResendRemainingSeconds] = useState(0);
+  const otpRequestInFlight = useRef(false);
   const isWideAndroid = Platform.OS === 'android' && width >= 520;
   const bottomPadding = Math.max(
-    insets.bottom + 28,
-    isWideAndroid ? 92 : 42,
+    insets.bottom + 20,
+    isWideAndroid ? 84 : 20,
   );
 
   useEffect(() => {
@@ -96,7 +95,6 @@ export default function SignUpScreen() {
     const { error } = await supabase.from('profiles').upsert(
       {
         id: userId,
-        role: 'parent',
         full_name: '학부모',
         phone: normalizedPhone,
       },
@@ -106,73 +104,58 @@ export default function SignUpScreen() {
     if (error) throw error;
   };
 
+  const requestSignUpOtp = async (normalizedPhone: string) => {
+    return supabase.auth.signInWithOtp({
+      phone: normalizedPhone,
+      options: {
+        channel: 'sms',
+        shouldCreateUser: true,
+        data: {
+          phone: normalizedPhone,
+        },
+      },
+    });
+  };
+
   const handleRequestVerification = async () => {
-    if (isSubmitting) return;
+    if (isSubmitting || otpRequestInFlight.current) return;
+
+    if (!hasAcceptedRequiredLegalConsents(legalConsent)) {
+      Alert.alert(
+        '필수 동의 확인',
+        '필수 동의 내용을 모두 확인해주세요.',
+      );
+      return;
+    }
 
     if (!isValidKoreanPhone(phone)) {
       Alert.alert('입력 확인', '휴대폰 번호를 정확히 입력해주세요.');
       return;
     }
 
+    otpRequestInFlight.current = true;
     setIsSubmitting(true);
 
     const normalizedPhone = normalizeKoreanPhone(phone);
-    const { data: isRegistered, error: registrationCheckError } =
-      await supabase.rpc('is_phone_registered', {
-        p_phone: normalizedPhone,
-      });
+    try {
+      const { error } = await requestSignUpOtp(normalizedPhone);
 
-    if (registrationCheckError) {
+      if (error) {
+        Alert.alert('인증번호 발송 실패', getOtpSendErrorMessage(error.message));
+        return;
+      }
+
+      setPendingPhone(normalizedPhone);
+      setVerificationCode('');
+      startOtpCountdown();
+      setStep('code');
+      Alert.alert('인증번호 발송', '문자로 받은 인증번호를 입력해주세요.');
+    } catch {
+      Alert.alert('인증번호 발송 실패', getOtpSendErrorMessage());
+    } finally {
+      otpRequestInFlight.current = false;
       setIsSubmitting(false);
-      Alert.alert(
-        '가입 여부 확인 실패',
-        '전화번호 가입 여부를 확인하지 못했어요. 잠시 후 다시 시도해주세요.',
-      );
-      return;
     }
-
-    if (isRegistered) {
-      setIsSubmitting(false);
-      Alert.alert(
-        '이미 가입된 아이디입니다',
-        '로그인하거나 비밀번호 찾기를 이용해주세요.',
-      );
-      return;
-    }
-
-    const { data, error } = await supabase.auth.signUp({
-      phone: normalizedPhone,
-      password: createTemporaryPassword(),
-      options: {
-        channel: 'sms',
-        data: {
-          phone: normalizedPhone,
-        },
-      },
-    });
-
-    if (error) {
-      setIsSubmitting(false);
-      const message = error.message.toLowerCase().includes('already')
-        ? '이미 가입했거나 인증이 진행 중인 전화번호입니다. 로그인하거나 비밀번호 찾기를 이용해주세요.'
-        : '인증번호를 보내지 못했어요. 잠시 후 다시 시도해주세요.';
-      Alert.alert('인증번호 발송 실패', message);
-      return;
-    }
-
-    setPendingPhone(normalizedPhone);
-    setVerificationCode('');
-    startOtpCountdown();
-    setIsSubmitting(false);
-
-    if (data.session && data.user) {
-      setStep('password');
-      Alert.alert('인증 완료', '전화번호 인증에 성공했어요. 비밀번호를 설정해주세요.');
-      return;
-    }
-
-    setStep('code');
-    Alert.alert('인증번호 발송', '문자로 받은 인증번호를 입력해주세요.');
   };
 
   const handleVerifyCode = async () => {
@@ -195,7 +178,7 @@ export default function SignUpScreen() {
     setIsSubmitting(true);
 
     const normalizedPhone = pendingPhone || normalizeKoreanPhone(phone);
-    const { error } = await supabase.auth.verifyOtp({
+    const { data, error } = await supabase.auth.verifyOtp({
       phone: normalizedPhone,
       token,
       type: 'sms',
@@ -207,38 +190,88 @@ export default function SignUpScreen() {
       return;
     }
 
+    if (!data.user) {
+      setIsSubmitting(false);
+      Alert.alert(
+        '인증 확인 실패',
+        '인증된 계정 정보를 확인하지 못했어요. 잠시 후 다시 시도해주세요.',
+      );
+      return;
+    }
+
+    try {
+      const currentConsent = await getCurrentGuardianConsent(data.user.id);
+
+      if (currentConsent) {
+        setIsSubmitting(false);
+        Alert.alert(
+          '로그인 완료',
+          '이미 가입된 계정으로 로그인했어요.',
+          [
+            {
+              text: '확인',
+              onPress: () => router.replace('/(tabs)/home'),
+            },
+          ],
+        );
+        return;
+      }
+    } catch {
+      setIsSubmitting(false);
+      Alert.alert(
+        '가입 상태 확인 실패',
+        '계정 상태를 확인하지 못했어요. 잠시 후 다시 시도해주세요.',
+      );
+      return;
+    }
+
     setIsSubmitting(false);
     setStep('password');
     Alert.alert('인증 완료', '전화번호 인증에 성공했어요. 비밀번호를 설정해주세요.');
   };
 
   const handleResendVerification = async () => {
-    if (isSubmitting || step !== 'code' || resendRemainingSeconds > 0) return;
+    if (
+      isSubmitting ||
+      otpRequestInFlight.current ||
+      step !== 'code' ||
+      resendRemainingSeconds > 0
+    ) {
+      return;
+    }
 
     const normalizedPhone = pendingPhone || normalizeKoreanPhone(phone);
     if (!normalizedPhone) return;
 
+    otpRequestInFlight.current = true;
     setIsSubmitting(true);
 
-    const { error } = await supabase.auth.resend({
-      type: 'sms',
-      phone: normalizedPhone,
-    });
+    try {
+      const { error } = await requestSignUpOtp(normalizedPhone);
 
-    setIsSubmitting(false);
+      if (error) {
+        Alert.alert('재전송 실패', getOtpSendErrorMessage(error.message));
+        return;
+      }
 
-    if (error) {
-      Alert.alert('재전송 실패', '인증번호를 다시 보내지 못했어요. 잠시 후 다시 시도해주세요.');
-      return;
+      setVerificationCode('');
+      startOtpCountdown();
+      Alert.alert('인증번호 재전송', '새 인증번호를 문자로 보냈어요.');
+    } catch {
+      Alert.alert('재전송 실패', getOtpSendErrorMessage());
+    } finally {
+      otpRequestInFlight.current = false;
+      setIsSubmitting(false);
     }
-
-    setVerificationCode('');
-    startOtpCountdown();
-    Alert.alert('인증번호 재전송', '새 인증번호를 문자로 보냈어요.');
   };
 
   const handleCompleteSignUp = async () => {
     if (isSubmitting) return;
+
+    if (!hasAcceptedRequiredLegalConsents(legalConsent)) {
+      Alert.alert('필수 동의 확인', '필수 동의 내용을 모두 확인해주세요.');
+      return;
+    }
 
     const passwordError = getPasswordValidationError(password, phone);
     if (passwordError) {
@@ -270,6 +303,7 @@ export default function SignUpScreen() {
     if (user) {
       try {
         await ensureParentProfile(user.id, pendingPhone || normalizeKoreanPhone(phone));
+        await recordGuardianConsent(legalConsent, 'signup');
         await markChildRegistrationGuidePending(user.id);
       } catch {
         setIsSubmitting(false);
@@ -318,13 +352,6 @@ export default function SignUpScreen() {
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <View style={styles.bgCircleTop} />
-        <View style={styles.bgCircleBottom} />
-
-        <Pressable onPress={goBackOrStart} style={styles.backButton} hitSlop={10}>
-          <Text style={styles.backText}>←</Text>
-        </Pressable>
-
         <ScrollView
           alwaysBounceVertical={false}
           bounces={false}
@@ -333,29 +360,46 @@ export default function SignUpScreen() {
           overScrollMode="never"
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.headerArea}>
-            <BrandWordmark width={148} style={styles.brandLogo} />
-            <Text style={styles.title}>회원가입</Text>
-            <Text style={styles.subtitle}>
-              전화번호를 인증한 뒤 비밀번호를 설정해주세요
-            </Text>
-          </View>
+          <View style={styles.mainArea}>
+            <Pressable
+              onPress={goBackOrStart}
+              style={({ pressed }) => [
+                styles.backButton,
+                pressed && styles.buttonPressed,
+              ]}
+              hitSlop={10}
+            >
+              <Ionicons name="arrow-back" size={28} color={authColors.navy} />
+            </Pressable>
 
-          <View style={styles.formArea}>
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>전화번호(보호자)</Text>
-              <TextInput
-                value={phone}
-                onChangeText={(value) => setPhone(formatKoreanPhoneInput(value))}
-                placeholder="휴대폰 번호를 입력해주세요"
-                placeholderTextColor={colors.muted}
-                keyboardType="phone-pad"
-                editable={step === 'phone' && !isSubmitting}
-                style={styles.input}
-                textContentType="telephoneNumber"
-                autoComplete="tel"
-              />
+            <View style={styles.headerArea}>
+              <BrandWordmark width={157} style={styles.brandLogo} />
+              <Text style={styles.title}>회원가입</Text>
+              <Text style={styles.subtitle}>
+                전화번호를 인증한 뒤 비밀번호를 설정해주세요
+              </Text>
             </View>
+
+            <View
+              style={[
+                styles.formArea,
+                step === 'phone' && styles.phoneFormArea,
+              ]}
+            >
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>전화번호 (보호자)</Text>
+                <TextInput
+                  value={phone}
+                  onChangeText={(value) => setPhone(formatKoreanPhoneInput(value))}
+                  placeholder="휴대폰 번호를 입력해주세요"
+                  placeholderTextColor={authColors.placeholder}
+                  keyboardType="phone-pad"
+                  editable={step === 'phone' && !isSubmitting}
+                  style={styles.input}
+                  textContentType="telephoneNumber"
+                  autoComplete="tel"
+                />
+              </View>
 
             {step !== 'phone' && (
               <View style={styles.inputGroup}>
@@ -364,7 +408,7 @@ export default function SignUpScreen() {
                   value={verificationCode}
                   onChangeText={setVerificationCode}
                   placeholder="문자로 받은 인증번호를 입력해주세요"
-                  placeholderTextColor={colors.muted}
+                placeholderTextColor={authColors.placeholder}
                   keyboardType="number-pad"
                   maxLength={8}
                   editable={step === 'code' && !isSubmitting}
@@ -412,7 +456,7 @@ export default function SignUpScreen() {
                     value={password}
                     onChangeText={setPassword}
                     placeholder="8~20자로 입력해주세요"
-                    placeholderTextColor={colors.muted}
+                    placeholderTextColor={authColors.placeholder}
                     secureTextEntry
                     maxLength={20}
                     style={styles.input}
@@ -428,7 +472,7 @@ export default function SignUpScreen() {
                     value={passwordConfirm}
                     onChangeText={setPasswordConfirm}
                     placeholder="비밀번호를 다시 입력해주세요"
-                    placeholderTextColor={colors.muted}
+                    placeholderTextColor={authColors.placeholder}
                     secureTextEntry
                     maxLength={20}
                     style={styles.input}
@@ -440,22 +484,32 @@ export default function SignUpScreen() {
               </>
             )}
 
-            <Pressable
-              disabled={isSubmitting}
-              style={({ pressed }) => [
-                styles.signUpButton,
-                isSubmitting && styles.signUpButtonDisabled,
-                pressed && styles.buttonPressed,
-              ]}
-              onPress={handlePrimaryAction}
-            >
-              <Text style={styles.signUpButtonText}>{primaryButtonText}</Text>
-            </Pressable>
+              {step === 'phone' ? (
+                <LegalConsentForm
+                  value={legalConsent}
+                  onChange={setLegalConsent}
+                  disabled={isSubmitting}
+                  compact
+                />
+              ) : null}
+
+              <Pressable
+                disabled={isSubmitting}
+                style={({ pressed }) => [
+                  styles.signUpButton,
+                  isSubmitting && styles.signUpButtonDisabled,
+                  pressed && styles.buttonPressed,
+                ]}
+                onPress={handlePrimaryAction}
+              >
+                <Text style={styles.signUpButtonText}>{primaryButtonText}</Text>
+              </Pressable>
+            </View>
           </View>
 
           <View style={styles.footerArea}>
             <Pressable onPress={() => router.replace('/login')} hitSlop={10}>
-              <Text style={styles.footerLink}>이미 계정이 있다면 로그인</Text>
+              <Text style={styles.footerLink}>이미 계정이 있어요</Text>
             </Pressable>
           </View>
         </ScrollView>
@@ -467,98 +521,80 @@ export default function SignUpScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: authColors.background,
   },
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: authColors.background,
     overflow: 'hidden',
   },
-  bgCircleTop: {
-    position: 'absolute',
-    top: -60,
-    right: -50,
-    width: 220,
-    height: 220,
-    borderRadius: 999,
-    backgroundColor: '#DDEDFC',
-    opacity: 0.95,
-  },
-  bgCircleBottom: {
-    position: 'absolute',
-    bottom: -150,
-    left: -90,
-    width: 250,
-    height: 250,
-    borderRadius: 999,
-    backgroundColor: '#F7EBA6',
-    opacity: 0.95,
-  },
   backButton: {
-    position: 'absolute',
-    top: 54,
-    left: 22,
-    width: 44,
-    height: 44,
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    borderWidth: 1,
+    borderColor: authColors.navy,
     alignItems: 'center',
     justifyContent: 'center',
-    zIndex: 3,
-  },
-  backText: {
-    color: colors.navy,
-    fontSize: 35,
-    fontWeight: '700',
+    marginBottom: 40,
   },
   content: {
     flexGrow: 1,
-    paddingHorizontal: 30,
-    paddingTop: 78,
-    paddingBottom: 30,
+    paddingHorizontal: 20,
+    paddingTop: 20,
     justifyContent: 'space-between',
   },
+  mainArea: {
+    width: '100%',
+  },
   headerArea: {
-    alignItems: 'center',
-    marginTop: 4,
+    alignItems: 'flex-start',
   },
   brandLogo: {
-    marginBottom: 16,
+    marginBottom: 20,
   },
   title: {
-    color: colors.navy,
-    fontSize: 26,
+    color: authColors.text,
+    fontFamily: 'Pretendard-Bold',
+    fontSize: 20,
     lineHeight: 30,
-    fontWeight: '900',
-    letterSpacing: 0,
-    textAlign: 'center',
-    marginBottom: 10,
+    letterSpacing: -0.6,
+    marginBottom: 8,
   },
   subtitle: {
-    color: colors.muted,
-    fontSize: 15,
+    color: authColors.textMuted,
+    fontFamily: 'Pretendard-Medium',
+    fontSize: 16,
     lineHeight: 24,
-    fontWeight: '600',
-    textAlign: 'center',
+    letterSpacing: -0.48,
   },
   formArea: {
-    marginTop: 10,
-    gap: 18,
+    marginTop: 80,
+    gap: 20,
+  },
+  phoneFormArea: {
+    marginTop: 28,
+    gap: 14,
   },
   inputGroup: {
     gap: 8,
   },
   inputLabel: {
-    color: colors.navySoft,
-    fontSize: 15,
-    fontWeight: '700',
+    color: authColors.navy,
+    fontFamily: 'Pretendard-Medium',
+    fontSize: 14,
+    letterSpacing: -0.7,
   },
   input: {
-    height: 50,
-    color: colors.navy,
-    fontSize: 18,
-    fontWeight: '600',
-    borderBottomWidth: 1.2,
-    borderBottomColor: colors.lineStrong,
-    paddingHorizontal: 0,
+    height: 46,
+    borderRadius: 16,
+    backgroundColor: authColors.input,
+    color: authColors.text,
+    fontFamily: 'Pretendard-Bold',
+    fontSize: 16,
+    letterSpacing: -0.8,
+    paddingHorizontal: 16,
+    paddingVertical: 0,
   },
   codeMetaRow: {
     alignItems: 'center',
@@ -567,9 +603,9 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   timerText: {
-    color: colors.orange,
+    color: authColors.timer,
+    fontFamily: 'Pretendard-Medium',
     fontSize: 12,
-    fontWeight: '800',
   },
   resendButton: {
     paddingVertical: 4,
@@ -578,19 +614,18 @@ const styles = StyleSheet.create({
     opacity: 0.55,
   },
   resendButtonText: {
-    color: colors.navy,
+    color: authColors.navy,
+    fontFamily: 'Pretendard-Bold',
     fontSize: 12,
-    fontWeight: '900',
     textDecorationLine: 'underline',
   },
   resendButtonTextDisabled: {
-    color: colors.muted,
+    color: authColors.placeholder,
   },
   signUpButton: {
-    marginTop: 12,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: colors.honey,
+    height: 52,
+    borderRadius: 14,
+    backgroundColor: authColors.yellow,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -598,20 +633,20 @@ const styles = StyleSheet.create({
     opacity: 0.58,
   },
   signUpButtonText: {
-    color: colors.navy,
-    fontSize: 18,
-    fontWeight: '900',
-    letterSpacing: 0,
+    color: authColors.navy,
+    fontFamily: 'Pretendard-Bold',
+    fontSize: 16,
+    letterSpacing: -0.48,
   },
   footerArea: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingBottom: 8,
   },
   footerLink: {
-    color: colors.navy,
+    color: authColors.navy,
+    fontFamily: 'Pretendard-Bold',
     fontSize: 14,
-    fontWeight: '600',
+    letterSpacing: -0.42,
     textDecorationLine: 'underline',
   },
   buttonPressed: {

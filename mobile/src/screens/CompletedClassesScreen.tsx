@@ -397,20 +397,20 @@ export default function CompletedClassesScreen() {
 
 const styles = StyleSheet.create({
   header: {
-    marginBottom: 24,
+    marginBottom: 22,
   },
   title: {
     color: colors.navy,
-    fontSize: 32,
-    fontWeight: '900',
+    fontFamily: 'Pretendard-Bold',
+    fontSize: 30,
     letterSpacing: 0,
     marginBottom: 8,
   },
   subtitle: {
     color: colors.muted,
+    fontFamily: 'Pretendard-Medium',
     fontSize: 15,
     lineHeight: 23,
-    fontWeight: '700',
   },
   childSelector: {
     alignItems: 'center',
@@ -425,29 +425,20 @@ const styles = StyleSheet.create({
   childChip: {
     alignItems: 'center',
     alignSelf: 'flex-start',
-    backgroundColor: 'rgba(255,255,255,0.74)',
-    borderColor: 'rgba(255,255,255,0.88)',
-    borderRadius: 24,
-    borderWidth: 1,
-    height: 46,
+    backgroundColor: colors.white,
+    borderRadius: 20,
+    height: 44,
     justifyContent: 'center',
     minWidth: 92,
     paddingHorizontal: 18,
-    shadowColor: colors.navy,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.05,
-    shadowRadius: 12,
-    elevation: 2,
   },
   childChipSelected: {
     backgroundColor: colors.navy,
-    borderColor: colors.navy,
-    shadowOpacity: 0.13,
   },
   childChipText: {
     color: colors.navySoft,
+    fontFamily: 'Pretendard-Bold',
     fontSize: 14,
-    fontWeight: '900',
   },
   childChipTextSelected: {
     color: colors.white,
@@ -457,7 +448,7 @@ const styles = StyleSheet.create({
   },
   memoryCard: {
     overflow: 'hidden',
-    borderRadius: 32,
+    borderRadius: 20,
     backgroundColor: colors.cardSolid,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.88)',
@@ -471,7 +462,7 @@ const styles = StyleSheet.create({
     opacity: 0.86,
   },
   photoButton: {
-    borderRadius: 24,
+    borderRadius: 20,
   },
   photoStrip: {
     gap: 10,
@@ -479,7 +470,7 @@ const styles = StyleSheet.create({
   },
   countryTile: {
     alignItems: 'center',
-    borderRadius: 24,
+    borderRadius: 20,
     gap: 6,
     height: 150,
     justifyContent: 'center',
@@ -491,25 +482,25 @@ const styles = StyleSheet.create({
   },
   countryName: {
     color: colors.navy,
+    fontFamily: 'Pretendard-Bold',
     fontSize: 16,
-    fontWeight: '900',
     textAlign: 'center',
   },
   countryLabel: {
     color: colors.navySoft,
+    fontFamily: 'Pretendard-Bold',
     fontSize: 12,
-    fontWeight: '900',
   },
   memoryPhoto: {
     width: 220,
     height: 150,
-    borderRadius: 24,
+    borderRadius: 20,
     backgroundColor: colors.background,
   },
   photoEmptyTile: {
     alignItems: 'center',
     backgroundColor: colors.background,
-    borderRadius: 24,
+    borderRadius: 20,
     height: 150,
     justifyContent: 'center',
     paddingHorizontal: 16,
@@ -517,8 +508,8 @@ const styles = StyleSheet.create({
   },
   photoEmptyText: {
     color: colors.muted,
+    fontFamily: 'Pretendard-Medium',
     fontSize: 13,
-    fontWeight: '700',
     textAlign: 'center',
   },
   memoryBody: {
@@ -527,22 +518,22 @@ const styles = StyleSheet.create({
   },
   classTitle: {
     color: colors.navy,
+    fontFamily: 'Pretendard-Bold',
     fontSize: 20,
     lineHeight: 26,
-    fontWeight: '900',
     marginBottom: 7,
   },
   childText: {
     color: colors.orange,
+    fontFamily: 'Pretendard-Bold',
     fontSize: 13,
-    fontWeight: '900',
     marginBottom: 11,
   },
   diary: {
     color: colors.text,
+    fontFamily: 'Pretendard-Medium',
     fontSize: 14,
     lineHeight: 22,
-    fontWeight: '700',
     marginBottom: 14,
   },
   commentBox: {
@@ -552,34 +543,34 @@ const styles = StyleSheet.create({
   },
   commentLabel: {
     color: colors.navy,
+    fontFamily: 'Pretendard-Bold',
     fontSize: 12,
-    fontWeight: '900',
     marginBottom: 6,
   },
   commentText: {
     color: colors.muted,
+    fontFamily: 'Pretendard-Medium',
     fontSize: 13,
     lineHeight: 20,
-    fontWeight: '700',
   },
   emptyCard: {
     padding: 24,
-    borderRadius: 28,
+    borderRadius: 20,
     backgroundColor: colors.white,
     alignItems: 'center',
     marginTop: 18,
   },
   emptyTitle: {
     color: colors.navy,
+    fontFamily: 'Pretendard-Bold',
     fontSize: 19,
-    fontWeight: '900',
     marginBottom: 8,
   },
   emptyText: {
     color: colors.muted,
+    fontFamily: 'Pretendard-Medium',
     fontSize: 14,
     lineHeight: 21,
-    fontWeight: '700',
     textAlign: 'center',
   },
   modalBackdrop: {
@@ -602,18 +593,18 @@ const styles = StyleSheet.create({
   },
   modalCountry: {
     color: colors.honey,
+    fontFamily: 'Pretendard-Bold',
     fontSize: 14,
-    fontWeight: '900',
   },
   modalTitle: {
     color: colors.white,
+    fontFamily: 'Pretendard-Bold',
     fontSize: 20,
-    fontWeight: '900',
   },
   modalCounter: {
     color: 'rgba(255,255,255,0.72)',
+    fontFamily: 'Pretendard-Bold',
     fontSize: 13,
-    fontWeight: '800',
   },
   modalCloseButton: {
     alignItems: 'center',
@@ -625,8 +616,8 @@ const styles = StyleSheet.create({
   },
   modalCloseText: {
     color: colors.white,
+    fontFamily: 'Pretendard-Bold',
     fontSize: 14,
-    fontWeight: '900',
   },
   modalPhotoPage: {
     flex: 1,
@@ -649,7 +640,7 @@ const styles = StyleSheet.create({
   },
   saveButtonText: {
     color: colors.navy,
+    fontFamily: 'Pretendard-Bold',
     fontSize: 17,
-    fontWeight: '900',
   },
 });

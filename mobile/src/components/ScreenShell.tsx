@@ -2,22 +2,12 @@ import { ReactNode } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { colors } from '@/src/theme/colors';
-
 type ScreenShellProps = {
   children: ReactNode;
   scroll?: boolean;
 };
 
 export default function ScreenShell({ children, scroll = true }: ScreenShellProps) {
-  const content = (
-    <>
-      <View style={styles.bgCircleTop} />
-      <View style={styles.bgCircleBottom} />
-      {children}
-    </>
-  );
-
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
       {scroll ? (
@@ -28,10 +18,10 @@ export default function ScreenShell({ children, scroll = true }: ScreenShellProp
           overScrollMode="never"
           showsVerticalScrollIndicator={false}
         >
-          {content}
+          {children}
         </ScrollView>
       ) : (
-        <View style={styles.fixedContent}>{content}</View>
+        <View style={styles.fixedContent}>{children}</View>
       )}
     </SafeAreaView>
   );
@@ -40,14 +30,14 @@ export default function ScreenShell({ children, scroll = true }: ScreenShellProp
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: '#FEF9E7',
   },
   scrollContent: {
     flexGrow: 1,
     paddingHorizontal: 22,
     paddingTop: 18,
     paddingBottom: 26,
-    backgroundColor: colors.background,
+    backgroundColor: '#FEF9E7',
     overflow: 'hidden',
   },
   fixedContent: {
@@ -55,27 +45,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 22,
     paddingTop: 18,
     paddingBottom: 26,
-    backgroundColor: colors.background,
+    backgroundColor: '#FEF9E7',
     overflow: 'hidden',
-  },
-  bgCircleTop: {
-    position: 'absolute',
-    top: -60,
-    right: -50,
-    width: 220,
-    height: 220,
-    borderRadius: 999,
-    backgroundColor: colors.sky,
-    opacity: 0.95,
-  },
-  bgCircleBottom: {
-    position: 'absolute',
-    bottom: -150,
-    left: -105,
-    width: 250,
-    height: 250,
-    borderRadius: 999,
-    backgroundColor: '#F7EBA6',
-    opacity: 0.95,
   },
 });

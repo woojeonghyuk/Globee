@@ -3,14 +3,14 @@ export const colors = {
   backgroundSoft: '#FFF2B2',
   backgroundDeep: '#F0E178',
 
-  navy: '#14213D',
-  navySoft: 'rgba(20, 33, 61, 0.72)',
+  navy: '#0F2E4B',
+  navySoft: 'rgba(15, 46, 75, 0.72)',
   white: '#FFFFFF',
 
   text: '#24314F',
-  muted: '#7A859E',
-  line: 'rgba(20, 33, 61, 0.18)',
-  lineStrong: 'rgba(20, 33, 61, 0.72)',
+  muted: '#667189',
+  line: 'rgba(15, 46, 75, 0.18)',
+  lineStrong: 'rgba(15, 46, 75, 0.72)',
 
   honey: '#F7E56B',
   honeyDeep: '#E8D34B',
@@ -22,8 +22,8 @@ export const colors = {
   green: '#4F9F65',
   orange: '#D98522',
 
-  overlaySoft: 'rgba(20, 33, 61, 0.04)',
+  overlaySoft: 'rgba(15, 46, 75, 0.04)',
   card: 'rgba(255,255,255,0.34)',
   cardSolid: '#FFFDF2',
-  shadow: 'rgba(20, 33, 61, 0.12)',
+  shadow: 'rgba(15, 46, 75, 0.12)',
 };

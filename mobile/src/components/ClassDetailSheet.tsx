@@ -102,7 +102,7 @@ const styles = StyleSheet.create({
   modalBackdrop: {
     flex: 1,
     justifyContent: 'flex-end',
-    backgroundColor: 'rgba(17, 28, 61, 0.32)',
+    backgroundColor: 'rgba(15, 46, 75, 0.32)',
   },
   modalCard: {
     maxHeight: '92%',
@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
   modalCloseText: {
     color: colors.navy,
     fontSize: 28,
-    fontWeight: '700',
+    fontFamily: 'Pretendard-Medium',
     lineHeight: 30,
   },
   modalScrollContent: {
@@ -148,13 +148,13 @@ const styles = StyleSheet.create({
   teacherName: {
     color: colors.orange,
     fontSize: 18,
-    fontWeight: '900',
+    fontFamily: 'Pretendard-Bold',
     marginBottom: 4,
   },
   countryName: {
     color: colors.navy,
     fontSize: 34,
-    fontWeight: '900',
+    fontFamily: 'Pretendard-Bold',
     letterSpacing: 0,
     marginBottom: 10,
   },
@@ -162,14 +162,14 @@ const styles = StyleSheet.create({
     color: colors.navy,
     fontSize: 21,
     lineHeight: 27,
-    fontWeight: '900',
+    fontFamily: 'Pretendard-Bold',
     marginBottom: 10,
   },
   modalDescription: {
     color: colors.text,
     fontSize: 14,
     lineHeight: 22,
-    fontWeight: '700',
+    fontFamily: 'Pretendard-Medium',
     opacity: 0.78,
     marginBottom: 16,
   },
@@ -177,7 +177,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 10,
     padding: 15,
-    borderRadius: 22,
+    borderRadius: 20,
     backgroundColor: '#F6F1DD',
     marginBottom: 18,
   },
@@ -192,13 +192,13 @@ const styles = StyleSheet.create({
   infoLabel: {
     color: colors.muted,
     fontSize: 12,
-    fontWeight: '900',
+    fontFamily: 'Pretendard-Bold',
     marginBottom: 5,
   },
   infoText: {
     color: colors.navy,
     fontSize: 17,
-    fontWeight: '900',
+    fontFamily: 'Pretendard-Bold',
     textAlign: 'left',
   },
   capacityText: {

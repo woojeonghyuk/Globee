@@ -5,12 +5,14 @@ import {
   Pressable,
   StyleSheet,
   Text,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 
+import BrandWordmark from '@/src/components/BrandWordmark';
 import ClassCard from '@/src/components/ClassCard';
 import ClassDetailSheet from '@/src/components/ClassDetailSheet';
 import ScreenShell from '@/src/components/ScreenShell';
@@ -24,10 +26,18 @@ import { supabase } from '@/src/lib/supabase';
 import { useApplications } from '@/src/state/ApplicationsContext';
 import { useClasses } from '@/src/state/ClassesContext';
 import { useChildProfiles } from '@/src/state/ChildProfilesContext';
+import { authColors } from '@/src/theme/auth';
 import { colors } from '@/src/theme/colors';
 
 function getCampusLabel(campus: string) {
-  return campus === '서울과기대' ? '서울과학기술대학교' : campus;
+  const campusLabels: Record<string, string> = {
+    서울과학기술대학교: '서울과기대',
+    광운대학교: '광운대',
+    서울여자대학교: '서울여대',
+    삼육대학교: '삼육대',
+  };
+
+  return campusLabels[campus] ?? campus;
 }
 
 function isActiveApplicationStatus(status: string) {
@@ -48,6 +58,7 @@ function getClassSortTime(classItem: ClassItem) {
 }
 
 export default function HomeScreen() {
+  const { width: screenWidth } = useWindowDimensions();
   const { guestIntro } = useLocalSearchParams<{ guestIntro?: string }>();
   const { children, isLoading: isLoadingChildren } = useChildProfiles();
   const { classes, errorMessage, isLoading, refreshClasses } = useClasses();
@@ -86,6 +97,25 @@ export default function HomeScreen() {
   );
 
   const campusOptions = fixedCampusOptions;
+  const campusRowWidth = Math.max(screenWidth - 44, 0);
+  const isCompactCampusRow = campusRowWidth < 300;
+  const campusChipHorizontalPadding = isCompactCampusRow ? 7 : 11;
+  const campusChipGap = isCompactCampusRow ? 8 : 12;
+  const campusLabelCharacterCount = campusOptions.reduce(
+    (total, campus) => total + getCampusLabel(campus).length,
+    0,
+  );
+  const campusTextWidth =
+    campusRowWidth -
+    campusChipHorizontalPadding * campusOptions.length * 2 -
+    campusChipGap * (campusOptions.length - 1);
+  const campusFontSize = Math.min(
+    15,
+    Math.max(
+      11,
+      Math.floor((campusTextWidth / campusLabelCharacterCount) * 2) / 2,
+    ),
+  );
 
   useEffect(() => {
     if (!campusOptions.includes(selectedCampus)) {
@@ -606,6 +636,7 @@ export default function HomeScreen() {
 
       <View style={styles.header}>
         <View style={styles.brandRow}>
+          <BrandWordmark width={150} />
           {hasSession === false ? (
             <Pressable
               accessibilityRole="button"
@@ -617,31 +648,37 @@ export default function HomeScreen() {
                 pressed && styles.pressed,
               ]}
             >
-              <Ionicons name="arrow-back" size={20} color={colors.navy} />
+              <Ionicons name="arrow-back" size={28} color={authColors.navy} />
             </Pressable>
           ) : null}
-          <Text style={styles.brand}>Globee</Text>
         </View>
         <Text style={styles.title}>동네에서 떠나는 세계여행{'\n'}오늘 가볼 나라는 어디일까요?</Text>
       </View>
 
       <View style={styles.schoolSection}>
         <Text style={styles.sectionLabel}>학교 선택하기</Text>
-        <View style={styles.schoolRow}>
+        <View style={[styles.schoolRow, { gap: campusChipGap }]}>
           {campusOptions.map((campus) => {
             const isActive = campus === selectedCampus;
 
             return (
               <Pressable
                 key={campus}
-                style={[styles.schoolChip, isActive && styles.activeSchoolChip]}
+                style={[
+                  styles.schoolChip,
+                  { paddingHorizontal: campusChipHorizontalPadding },
+                  isActive && styles.activeSchoolChip,
+                ]}
                 onPress={() => setSelectedCampus(campus)}
               >
                 <Text
                   style={[
                     styles.schoolChipText,
+                    { fontSize: campusFontSize },
                     isActive && styles.activeSchoolChipText,
                   ]}
+                  allowFontScaling={false}
+                  numberOfLines={1}
                 >
                   {getCampusLabel(campus)}
                 </Text>
@@ -830,12 +867,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 22,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(20, 33, 61, 0.34)',
+    backgroundColor: 'rgba(15, 46, 75, 0.34)',
   },
   guideCard: {
     width: '100%',
     maxWidth: 420,
-    borderRadius: 28,
+    borderRadius: 20,
     paddingHorizontal: 22,
     paddingTop: 22,
     paddingBottom: 18,
@@ -859,20 +896,20 @@ const styles = StyleSheet.create({
   guideBadgeText: {
     color: colors.navy,
     fontSize: 12,
-    fontWeight: '900',
+    fontFamily: 'Pretendard-Bold',
   },
   guideTitle: {
     color: colors.navy,
     fontSize: 23,
     lineHeight: 31,
-    fontWeight: '900',
+    fontFamily: 'Pretendard-Bold',
     marginBottom: 10,
   },
   guideText: {
     color: colors.navySoft,
     fontSize: 14,
     lineHeight: 22,
-    fontWeight: '700',
+    fontFamily: 'Pretendard-Medium',
   },
   guideList: {
     gap: 10,
@@ -896,7 +933,7 @@ const styles = StyleSheet.create({
     color: colors.navy,
     fontSize: 14,
     lineHeight: 21,
-    fontWeight: '700',
+    fontFamily: 'Pretendard-Medium',
   },
   guideActions: {
     gap: 10,
@@ -913,7 +950,7 @@ const styles = StyleSheet.create({
   guideSecondaryButtonText: {
     color: colors.navySoft,
     fontSize: 14,
-    fontWeight: '800',
+    fontFamily: 'Pretendard-Bold',
   },
   guidePrimaryButton: {
     height: 56,
@@ -925,53 +962,46 @@ const styles = StyleSheet.create({
   guidePrimaryButtonText: {
     color: colors.white,
     fontSize: 16,
-    fontWeight: '900',
+    fontFamily: 'Pretendard-Bold',
   },
   header: {
     marginBottom: 28,
   },
   brandRow: {
-    minHeight: 30,
+    minHeight: 46,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    marginBottom: 10,
+    justifyContent: 'space-between',
+    marginBottom: 16,
   },
   guestBackButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 12,
+    width: 46,
+    height: 46,
+    borderRadius: 23,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(255,255,255,0.72)',
     borderWidth: 1,
-    borderColor: colors.line,
-  },
-  brand: {
-    color: colors.orange,
-    fontSize: 24,
-    fontWeight: '900',
-    letterSpacing: 0,
+    borderColor: authColors.navy,
   },
   title: {
-    color: colors.navy,
-    fontSize: 31,
-    lineHeight: 38,
-    fontWeight: '900',
-    letterSpacing: 0,
+    color: authColors.text,
+    fontFamily: 'Pretendard-Bold',
+    fontSize: 23,
+    lineHeight: 30,
+    letterSpacing: -0.6,
   },
   guestGuideOverlay: {
     flex: 1,
     paddingHorizontal: 24,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(20, 33, 61, 0.34)',
+    backgroundColor: 'rgba(15, 46, 75, 0.34)',
   },
   guestGuideCard: {
     width: '100%',
     maxWidth: 380,
     padding: 22,
-    borderRadius: 26,
+    borderRadius: 20,
     backgroundColor: colors.cardSolid,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.92)',
@@ -985,14 +1015,14 @@ const styles = StyleSheet.create({
     color: colors.navy,
     fontSize: 21,
     lineHeight: 29,
-    fontWeight: '900',
+    fontFamily: 'Pretendard-Bold',
     marginBottom: 10,
   },
   guestGuideText: {
     color: colors.navySoft,
     fontSize: 14,
     lineHeight: 22,
-    fontWeight: '700',
+    fontFamily: 'Pretendard-Medium',
     marginBottom: 20,
   },
   guestGuideButton: {
@@ -1005,41 +1035,40 @@ const styles = StyleSheet.create({
   guestGuideButtonText: {
     color: colors.white,
     fontSize: 16,
-    fontWeight: '900',
+    fontFamily: 'Pretendard-Bold',
   },
   schoolSection: {
     marginBottom: 24,
   },
   sectionLabel: {
-    color: colors.navy,
-    fontSize: 18,
-    fontWeight: '900',
-    marginBottom: 12,
+    color: authColors.text,
+    fontFamily: 'Pretendard-Bold',
+    fontSize: 21,
+    letterSpacing: -0.42,
+    marginBottom: 16,
   },
   schoolRow: {
+    width: '100%',
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   schoolChip: {
-    paddingHorizontal: 15,
     paddingVertical: 10,
     borderRadius: 999,
-    backgroundColor: 'rgba(255,255,255,0.66)',
-    borderWidth: 1,
-    borderColor: colors.line,
+    backgroundColor: authColors.white,
   },
   activeSchoolChip: {
-    backgroundColor: colors.navy,
-    borderColor: colors.navy,
+    backgroundColor: authColors.navy,
   },
   schoolChipText: {
-    color: colors.navySoft,
-    fontSize: 13,
-    fontWeight: '900',
+    color: authColors.navy,
+    fontFamily: 'Pretendard-Medium',
+    letterSpacing: -0.42,
   },
   activeSchoolChipText: {
-    color: colors.white,
+    color: authColors.white,
+    fontFamily: 'Pretendard-Bold',
   },
   classSection: {
     marginBottom: 12,
@@ -1055,19 +1084,19 @@ const styles = StyleSheet.create({
     color: colors.navy,
     flexShrink: 1,
     fontSize: 22,
-    fontWeight: '900',
+    fontFamily: 'Pretendard-Bold',
   },
   classHeaderCount: {
     color: colors.muted,
     fontSize: 13,
-    fontWeight: '900',
+    fontFamily: 'Pretendard-Bold',
   },
   cardList: {
     gap: 14,
   },
   errorCard: {
     backgroundColor: '#FFE1E4',
-    borderRadius: 18,
+    borderRadius: 20,
     gap: 5,
     marginBottom: 14,
     padding: 14,
@@ -1075,17 +1104,17 @@ const styles = StyleSheet.create({
   errorTitle: {
     color: '#C52C3A',
     fontSize: 14,
-    fontWeight: '900',
+    fontFamily: 'Pretendard-Bold',
   },
   errorText: {
     color: '#8F2F39',
     fontSize: 12,
-    fontWeight: '700',
+    fontFamily: 'Pretendard-Medium',
     lineHeight: 18,
   },
   emptyClassCard: {
     padding: 22,
-    borderRadius: 26,
+    borderRadius: 20,
     backgroundColor: 'rgba(255,255,255,0.58)',
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.86)',
@@ -1095,13 +1124,13 @@ const styles = StyleSheet.create({
   emptyClassTitle: {
     color: colors.navy,
     fontSize: 18,
-    fontWeight: '900',
+    fontFamily: 'Pretendard-Bold',
     marginBottom: 7,
   },
   emptyClassText: {
     color: colors.muted,
     fontSize: 13,
-    fontWeight: '700',
+    fontFamily: 'Pretendard-Medium',
     textAlign: 'center',
     lineHeight: 20,
   },
@@ -1117,13 +1146,13 @@ const styles = StyleSheet.create({
   guestApplyNoticeTitle: {
     color: colors.navy,
     fontSize: 15,
-    fontWeight: '900',
+    fontFamily: 'Pretendard-Bold',
   },
   guestApplyNoticeText: {
     color: colors.muted,
     fontSize: 13,
     lineHeight: 20,
-    fontWeight: '700',
+    fontFamily: 'Pretendard-Medium',
   },
   guestAuthActions: {
     flexDirection: 'row',
@@ -1140,7 +1169,7 @@ const styles = StyleSheet.create({
   guestLoginButtonText: {
     color: colors.white,
     fontSize: 16,
-    fontWeight: '900',
+    fontFamily: 'Pretendard-Bold',
   },
   guestSignupButton: {
     flex: 1,
@@ -1153,12 +1182,12 @@ const styles = StyleSheet.create({
   guestSignupButtonText: {
     color: colors.navy,
     fontSize: 16,
-    fontWeight: '900',
+    fontFamily: 'Pretendard-Bold',
   },
   childSelectTitle: {
     color: colors.navy,
     fontSize: 15,
-    fontWeight: '900',
+    fontFamily: 'Pretendard-Bold',
     marginBottom: 10,
   },
   childChipRow: {
@@ -1194,7 +1223,7 @@ const styles = StyleSheet.create({
   childChipText: {
     color: colors.navy,
     fontSize: 13,
-    fontWeight: '900',
+    fontFamily: 'Pretendard-Bold',
   },
   activeChildChipText: {
     color: colors.white,
@@ -1214,11 +1243,11 @@ const styles = StyleSheet.create({
   addChildChipText: {
     color: colors.navy,
     fontSize: 13,
-    fontWeight: '900',
+    fontFamily: 'Pretendard-Bold',
   },
   emptyChildBox: {
     padding: 15,
-    borderRadius: 22,
+    borderRadius: 20,
     backgroundColor: colors.white,
     gap: 12,
   },
@@ -1226,7 +1255,7 @@ const styles = StyleSheet.create({
     color: colors.muted,
     fontSize: 13,
     lineHeight: 20,
-    fontWeight: '700',
+    fontFamily: 'Pretendard-Medium',
   },
   goMyButton: {
     height: 44,
@@ -1238,7 +1267,7 @@ const styles = StyleSheet.create({
   goMyButtonText: {
     color: colors.navy,
     fontSize: 14,
-    fontWeight: '900',
+    fontFamily: 'Pretendard-Bold',
   },
   applyButton: {
     height: 58,
@@ -1253,7 +1282,7 @@ const styles = StyleSheet.create({
   applyButtonText: {
     color: colors.white,
     fontSize: 16,
-    fontWeight: '900',
+    fontFamily: 'Pretendard-Bold',
   },
   pressed: {
     opacity: 0.9,

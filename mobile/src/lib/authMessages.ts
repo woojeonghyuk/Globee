@@ -19,6 +19,20 @@ export function getOtpVerificationErrorMessage(message?: string) {
   return '인증번호를 확인하지 못했어요. 잠시 후 다시 시도해주세요.';
 }
 
+export function getOtpSendErrorMessage(message?: string) {
+  const normalizedMessage = message?.toLowerCase() ?? '';
+
+  if (
+    normalizedMessage.includes('rate') ||
+    normalizedMessage.includes('too many') ||
+    normalizedMessage.includes('limit')
+  ) {
+    return '인증번호를 너무 자주 요청했어요. 잠시 후 다시 시도해주세요.';
+  }
+
+  return '인증번호를 보내지 못했어요. 잠시 후 다시 시도해주세요.';
+}
+
 export function getPasswordUpdateErrorMessage(message?: string) {
   const normalizedMessage = message?.toLowerCase() ?? '';
 
